@@ -1,4 +1,4 @@
-package convert
+package main
 
 import (
 	"flag"
@@ -62,9 +62,10 @@ func create(file fs.FileInfo) {
 	// 画像
 	dist := filepath.Join(monthPath, "salary")
 	exec.Command("pdftocairo", src, dist, "-opw", password, "-png").Output()
-	imagesrc := filepath.Join(monthPath, "salary-1.png")
-	imagedist := filepath.Join(monthPath, "salary.png")
-	os.Rename(imagesrc, imagedist)
+
+	// タイトル
+	dist = filepath.Join(monthPath, "salary-title.txt")
+	exec.Command("pdftotext", src, dist, "-opw", password, "-x", "500", "-y", "30", "-W", "400", "-H", "20").Output()
 
 	// 出勤
 	dist = filepath.Join(monthPath, "salary-count1.txt")
@@ -90,14 +91,18 @@ func create(file fs.FileInfo) {
 
 	// 支給1
 	dist = filepath.Join(monthPath, "salary1.txt")
-	exec.Command("pdftotext", src, dist, "-opw", password, "-x", "75", "-y", "150", "-W", "700", "-H", "60").Output()
+	exec.Command("pdftotext", src, dist, "-opw", password, "-x", "75", "-y", "150", "-W", "800", "-H", "60").Output()
 	// 支給2
 	dist = filepath.Join(monthPath, "salary2.txt")
-	exec.Command("pdftotext", src, dist, "-opw", password, "-x", "75", "-y", "200", "-W", "700", "-H", "60").Output()
-	// 控除
-	dist = filepath.Join(monthPath, "salary-cost.txt")
-	exec.Command("pdftotext", src, dist, "-opw", password, "-x", "75", "-y", "330", "-W", "700", "-H", "60").Output()
+	exec.Command("pdftotext", src, dist, "-opw", password, "-x", "75", "-y", "200", "-W", "800", "-H", "60").Output()
+	// 控除１
+	dist = filepath.Join(monthPath, "salary-cost1.txt")
+	exec.Command("pdftotext", src, dist, "-opw", password, "-x", "75", "-y", "330", "-W", "800", "-H", "60").Output()
+	// 控除２
+	dist = filepath.Join(monthPath, "salary-cost2.txt")
+	exec.Command("pdftotext", src, dist, "-opw", password, "-x", "75", "-y", "380", "-W", "800", "-H", "60").Output()
+
 	// 合計
 	dist = filepath.Join(monthPath, "salary-total.txt")
-	exec.Command("pdftotext", src, dist, "-opw", password, "-x", "75", "-y", "420", "-W", "700", "-H", "60").Output()
+	exec.Command("pdftotext", src, dist, "-opw", password, "-x", "75", "-y", "440", "-W", "800", "-H", "60").Output()
 }
