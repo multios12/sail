@@ -4,6 +4,7 @@ import (
 	"embed"
 	"net/http"
 	"path/filepath"
+	"sort"
 
 	"github.com/gin-gonic/gin"
 )
@@ -31,42 +32,58 @@ func getYear(c *gin.Context) {
 	y := YearModel{Year: c.Param("year")}
 
 	for _, detail := range details {
-		if detail.Month[:3] != y.Year {
+		isEnabled := false
+		for _, e := range y.EnableYears {
+			if e == detail.Month[:4] {
+				isEnabled = true
+			}
+		}
+		if !isEnabled {
+			y.EnableYears = append(y.EnableYears, detail.Month[:4])
+		}
+	}
+
+	for _, detail := range details {
+		if detail.Month[:4] != y.Year {
 			continue
 		}
 
 		y.Details = append(y.Details, detail)
 		for _, total := range detail.Totals {
 			exist := false
-			for _, yearTotal := range y.Totals {
+			for i, yearTotal := range y.Totals {
 				if total.Name == yearTotal.Name {
 					exist = true
-					yearTotal.Value += total.Value
+					y.Totals[i].Value += total.Value
 					break
 				}
 			}
-			if exist {
+			if !exist {
 				y.Totals = append(y.Totals, DetailItem{Name: total.Name, Value: total.Value})
 			}
 		}
 	}
+
+	sort.Slice(y.EnableYears, func(i, j int) bool { return y.EnableYears[i] > y.EnableYears[j] })
+	sort.Slice(y.Details, func(i, j int) bool { return y.Details[i].Month > y.Details[j].Month })
+	c.JSON(200, y)
 }
 
 // 月単位データ GET API
 func getMonth(c *gin.Context) {
 	m := c.Param("year") + c.Param("month")
-	var l []DetailModel
 	for _, v := range details {
 		if v.Month == m {
-			l = append(l, v)
+			c.JSON(200, v)
+			return
 		}
 	}
-	c.JSON(200, l)
+	c.Status(404)
 }
 
 // 月単位画像 GET API
 func getDetailImage(c *gin.Context) {
 	m := c.Param("year") + c.Param("month")
-	filename := filepath.Join(dataPath, m)
+	filename := filepath.Join(dataPath, m, "salary.png")
 	c.File(filename)
 }

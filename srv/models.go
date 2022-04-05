@@ -2,6 +2,7 @@ package main
 
 // 給与支給明細書モデル
 type DetailModel struct {
+	Title   string       // タイトル
 	Month   string       // 年月
 	IsError bool         // 取得エラー
 	Counts  []DetailItem // 日数配列
@@ -24,9 +25,10 @@ type TimeItem struct {
 }
 
 type YearModel struct {
-	Year    string        // 年
-	Totals  []DetailItem  // 合計リスト
-	Details []DetailModel // 月ごとの給与支給明細リスト
+	Year        string        // 年
+	EnableYears []string      // 利用可能な年のリスト
+	Totals      []DetailItem  // 合計リスト
+	Details     []DetailModel // 月ごとの給与支給明細リスト
 }
 
 // 経費等支給明細書モデル

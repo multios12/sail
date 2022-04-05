@@ -43,7 +43,10 @@ func readMonthDir(dirPath string) DetailModel {
 	s := DetailModel{}
 	s.Month = filepath.Base(dirPath)
 
-	filename := filepath.Join(dirPath, "salary-count1.txt")
+	filename := filepath.Join(dirPath, "salary-title.txt")
+	s.Title = readTextFileToString(filename)
+
+	filename = filepath.Join(dirPath, "salary-count1.txt")
 	s.Counts, s.IsError = readTextFileToDetailItem(filename)
 	filename = filepath.Join(dirPath, "salary-count2.txt")
 	counts2, isErr := readTextFileToDetailItem(filename)
@@ -71,12 +74,30 @@ func readMonthDir(dirPath string) DetailModel {
 	Salarys2, isErr := readTextFileToDetailItem(filename)
 	s.Salarys = append(s.Salarys, Salarys2...)
 	s.IsError = s.IsError || isErr
-	filename = filepath.Join(dirPath, "salary-cost.txt")
+
+	filename = filepath.Join(dirPath, "salary-cost1.txt")
 	s.Costs, s.IsError = readTextFileToDetailItem(filename)
+	filename = filepath.Join(dirPath, "salary-cost2.txt")
+	costs2, isErr := readTextFileToDetailItem(filename)
+	s.Costs = append(s.Costs, costs2...)
+	s.IsError = s.IsError || isErr
 
 	filename = filepath.Join(dirPath, "salary-total.txt")
 	s.Totals, s.IsError = readTextFileToDetailItem(filename)
 	return s
+}
+
+// テキストファイルの読み込み、文字列を返す
+func readTextFileToString(filename string) string {
+	bytes, err := ioutil.ReadFile(filename)
+	if err != nil {
+		return ""
+	}
+
+	text := string(bytes)
+	text = strings.ReplaceAll(text, "\f", "")
+	text = strings.ReplaceAll(text, "\n", "")
+	return text
 }
 
 // テキストファイルの読み込みと解析を行い、DetailItemを返す
@@ -86,12 +107,14 @@ func readTextFileToDetailItem(filename string) (items []DetailItem, isErr bool) 
 		return
 	}
 
-	r := regexp.MustCompile("^[,0-9]+$")
+	r := regexp.MustCompile("^[\\-,0-9]+$")
 
 	text := string(bytes)
 	lines := strings.Split(text, "\n")
 	var targets []string
 	for _, v := range lines {
+		v = strings.ReplaceAll(v, "\f", "")
+		v = strings.ReplaceAll(v, "▲", "-")
 		if len(v) == 0 || v == "\f" {
 			continue
 		} else if r.MatchString(v) {
