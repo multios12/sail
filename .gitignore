@@ -1,2 +1,7 @@
-/convert/convert
+/build
 /data
+/dist
+/convert/convert
+/node_modules
+/package-lock.json
+/srv/__debug_bin.exe

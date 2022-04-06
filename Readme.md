@@ -2,8 +2,8 @@
 ## プログラムの構成
 * convert
   給与支給明細書をデータファイルに変換する。popplerを使用するため、現在のところubuntsu上で利用する必要がある  
-* src
-* srv
+* sail
+  
 
 ## 必要なライブラリ
 * poppler-utils
@@ -14,7 +14,9 @@
 > sudo apt install poppler-utils poppler-data
 
 ### create new front react project
-> create-react-app
+> create-react-app sail --template typescript\
+> yarn add bulma
+> yarn add react-router-dom 
 
 ### create new server golang project
 > mkdir srv
@@ -24,3 +26,5 @@
 
 ## popplerのPDF 変換コマンド
 > pdftotext [pdfファイル] -opw [パスワード]
+
+
