@@ -27,7 +27,7 @@ func readAllData(dataPath string) []DetailModel {
 			}
 		}
 
-		if exist || !file.IsDir() || len(file.Name()) != 6 {
+		if exist || !file.IsDir() || (len(file.Name()) != 6 && len(file.Name()) != 7) {
 			continue
 		}
 
@@ -43,61 +43,28 @@ func readMonthDir(dirPath string) DetailModel {
 	s := DetailModel{}
 	s.Month = filepath.Base(dirPath)
 
-	filename := filepath.Join(dirPath, "salary-title.txt")
-	s.Title = readTextFileToString(filename)
-
-	filename = filepath.Join(dirPath, "salary-count1.txt")
-	s.Counts, s.IsError = readTextFileToDetailItem(filename)
-	filename = filepath.Join(dirPath, "salary-count2.txt")
-	counts2, isErr := readTextFileToDetailItem(filename)
-	s.Counts = append(s.Counts, counts2...)
-	s.IsError = s.IsError || isErr
-	filename = filepath.Join(dirPath, "salary-count3.txt")
-	Counts3, isErr := readTextFileToDetailItem(filename)
-	s.Counts = append(s.Counts, Counts3...)
-	s.IsError = s.IsError || isErr
-	filename = filepath.Join(dirPath, "salary-count5.txt")
-	Counts5, isErr := readTextFileToDetailItem(filename)
-	s.Counts = append(s.Counts, Counts5...)
-	s.IsError = s.IsError || isErr
-
-	filename = filepath.Join(dirPath, "salary-time1.txt")
-	s.Times, s.IsError = readTextFileToTimeItem(filename)
-	filename = filepath.Join(dirPath, "salary-time2.txt")
-	time2, isErr := readTextFileToTimeItem(filename)
-	s.Times = append(s.Times, time2...)
-	s.IsError = s.IsError || isErr
-
-	filename = filepath.Join(dirPath, "salary1.txt")
-	s.Salarys, s.IsError = readTextFileToDetailItem(filename)
-	filename = filepath.Join(dirPath, "salary2.txt")
-	Salarys2, isErr := readTextFileToDetailItem(filename)
-	s.Salarys = append(s.Salarys, Salarys2...)
-	s.IsError = s.IsError || isErr
-
-	filename = filepath.Join(dirPath, "salary-cost1.txt")
-	s.Costs, s.IsError = readTextFileToDetailItem(filename)
-	filename = filepath.Join(dirPath, "salary-cost2.txt")
-	costs2, isErr := readTextFileToDetailItem(filename)
-	s.Costs = append(s.Costs, costs2...)
-	s.IsError = s.IsError || isErr
-
-	filename = filepath.Join(dirPath, "salary-total.txt")
-	s.Totals, s.IsError = readTextFileToDetailItem(filename)
-	return s
-}
-
-// テキストファイルの読み込み、文字列を返す
-func readTextFileToString(filename string) string {
-	bytes, err := ioutil.ReadFile(filename)
-	if err != nil {
-		return ""
+	s.Title = s.Month[:4] + "年" + s.Month[4:6] + "月"
+	if s.Month[6:] == "S" {
+		s.Title += "賞与"
+	} else {
+		s.Title += "給与"
 	}
 
-	text := string(bytes)
-	text = strings.ReplaceAll(text, "\f", "")
-	text = strings.ReplaceAll(text, "\n", "")
-	return text
+	filename := filepath.Join(dirPath, "salary01.txt")
+	s.Counts, s.IsError = readTextFileToDetailItem(filename)
+
+	filename = filepath.Join(dirPath, "salary02.txt")
+	s.Times, s.IsError = readTextFileToTimeItem(filename)
+
+	filename = filepath.Join(dirPath, "salary10.txt")
+	s.Salarys, s.IsError = readTextFileToDetailItem(filename)
+
+	filename = filepath.Join(dirPath, "salary20.txt")
+	s.Costs, s.IsError = readTextFileToDetailItem(filename)
+
+	filename = filepath.Join(dirPath, "salary30.txt")
+	s.Totals, s.IsError = readTextFileToDetailItem(filename)
+	return s
 }
 
 // テキストファイルの読み込みと解析を行い、DetailItemを返す
@@ -133,11 +100,16 @@ func readTextFileToDetailItem(filename string) (items []DetailItem, isErr bool) 
 			if err != nil {
 				isErr = true
 			}
-			items = append(items, item)
+			if item.Value > 0 {
+				items = append(items, item)
+			}
+			item = DetailItem{Name: "", Value: 0}
+		} else if item.Name == "" && r.MatchString(v) {
 			item = DetailItem{Name: "", Value: 0}
 		} else {
-			items = append(items, item)
-			isErr = true
+			if item.Value > 0 {
+				items = append(items, item)
+			}
 			if !r.MatchString(v) {
 				item = DetailItem{Name: v, Value: 0}
 			} else {
@@ -146,7 +118,7 @@ func readTextFileToDetailItem(filename string) (items []DetailItem, isErr bool) 
 			}
 		}
 	}
-	if item.Name != "" {
+	if item.Name != "" && item.Value > 0 {
 		items = append(items, item)
 	}
 
