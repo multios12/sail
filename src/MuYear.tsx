@@ -3,6 +3,15 @@ import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { DetailItem, DetailModel, YearModel } from "./models";
 
+type Props<T> = {
+  Value: T
+}
+
+type MonthProps = {
+  year: string
+  model: YearModel
+}
+
 // リストコンポーネント
 const MuYear = () => {
   const { year } = useParams();
@@ -16,31 +25,34 @@ const MuYear = () => {
   }, [year]);
   return (
     <div>
-      {model.EnableYears.map(year => MuListMonth(year, model))}
+      {model.EnableYears.map(year => <MuListMonth key={year} year={year} model={model} />)}
     </div>
   )
 }
 
-const MuListMonth = (year: string, model: YearModel) => {
+const MuListMonth = ({ year, model }: MonthProps) => {
   if (year == model.Year) {
     return (
-      <div className="card px-10">
+      <div key={model.Year} className="card px-10">
         <div className="card-header">
           <div className="card-header-title">{model.Year}年</div>
         </div>
         <div className="card-content">
           <nav className="level">
-            {model.Totals?.map(i => MuTotalItem(i))}
+            {model.Totals?.map(v => <MuTotalItem key={v.Name} Value={v} />)}
           </nav>
           <table className="table is-striped is-hoverable">
             <thead>
-              <th></th>
-              <th>支給額</th>
-              <th>差引支給額</th>
-              <th>出勤日数</th>
+              <tr>
+                <th></th>
+                <th>支給額</th>
+                <th>差引支給額</th>
+                <th>経費支給額</th>
+                <th>出勤日数</th>
+              </tr>
             </thead>
             <tbody>
-              {model.Details?.map(v => MuListItem(v))}
+              {model.Details?.map(v => <MuListItem key={v.Month} Value={v} />)}
             </tbody>
           </table>
         </div>
@@ -58,24 +70,25 @@ const MuListMonth = (year: string, model: YearModel) => {
 }
 
 // 合計表示コンポーネント
-const MuTotalItem = (item: DetailItem) => {
+const MuTotalItem = ({Value}: Props<DetailItem>) => {
   return (
-    <div className="level-item has-text-centered">
-      <div>
-        <p className="heading">{item.Name}</p>
-        <p className="title">{item.Value.toLocaleString()}</p>
-      </div>
-    </div>)
+    <article className="tile is-child box">
+      <p className="is-size-6">{Value.Name}</p>
+      <p className="is-size-4">{Value.Value.toLocaleString()}</p>
+    </article>
+  )
 }
 
 // リストアイテムコンポーネント
-const MuListItem = (model: DetailModel) => {
+const MuListItem = (props: Props<DetailModel>) => {
+  const model = props.Value
   return (
-    <tr className={model.IsError ? 'has-background-danger-light' : ''}>
+    <tr key={model.Month} className={model.IsError ? 'has-background-danger-light' : ''}>
       <td><a href={`#/${model.Month.substring(0, 4)}/${model.Month.substring(4)}`}>{model.Title}</a></td>
-      <td>{model.Totals ? model.Totals[0].Value.toLocaleString(): 0}</td>
+      <td>{model.Totals ? model.Totals[0].Value.toLocaleString() : 0}</td>
       <td>{model.Totals ? model.Totals[2].Value.toLocaleString() : 0}</td>
-      <td>{model.Counts ? model.Counts[0].Value : 0}</td>
+      <td>{model.Month.length == 6 ? model.Expense.toLocaleString() : ""}</td>
+      <td>{model.Month.length == 6 ? model.Counts ? model.Counts[0].Value : 0 : ""}</td>
     </tr>
   )
 }

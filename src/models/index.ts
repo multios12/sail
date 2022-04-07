@@ -8,6 +8,9 @@ export type DetailModel = {
     Salarys: DetailItem[] // 支給配列
     Costs: DetailItem[] // 控除配列
     Totals: DetailItem[] // 合計配列
+    Expense: number            // 経費等支給合計額
+    Expenses: ExpenseItem[] // 経費内訳配列
+    Images: string[]      // 画像ファイル配列
 }
 
 export type DetailItem = {
@@ -18,6 +21,12 @@ export type DetailItem = {
 export type TimeItem = {
     Name: string;
     Value: string;
+}
+
+export type ExpenseItem = {
+    Name: string // 項目名
+    Amount: number    // 金額
+    Memo: string // 備考
 }
 
 export type YearModel = {
