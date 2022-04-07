@@ -29,18 +29,20 @@ func main() {
 		return
 	}
 
-	//var texts []string
 	for _, file := range files {
-		ext := path.Ext(file.Name())
-		if file.IsDir() || ext != ".pdf" {
-			continue
-		}
-
-		create(file)
+		createSalaryData(file)
+	}
+	for _, file := range files {
+		createExpenseData(file)
 	}
 }
 
-func create(file fs.FileInfo) {
+// 給与支給明細書データの作成
+func createSalaryData(file fs.FileInfo) {
+	ext := path.Ext(file.Name())
+	if file.IsDir() || ext != ".pdf" {
+		return
+	}
 	r := regexp.MustCompile(`(\d+)年(\d+)月(給与|.*賞与)_.+`)
 	if !r.MatchString(file.Name()) {
 		return
@@ -73,17 +75,18 @@ func create(file fs.FileInfo) {
 	pages := pdfinfo(src)
 
 	if n >= 202005 && strings.Contains(s, "賞与") {
-		createTextFrom202005S(src, monthPath)
+		readSalaryFrom202005S(src, monthPath)
 	} else if n >= 202005 {
-		createTextFrom202005(src, monthPath, pages)
+		readSalaryFrom202005(src, monthPath, pages)
 	} else if n >= 202003 {
-		createTextFrom202003(src, monthPath)
+		readSalaryFrom202003(src, monthPath)
 	} else {
-		createTextFrom201901(src, monthPath)
+		readSalaryFrom201901(src, monthPath)
 	}
-
 }
-func createTextFrom201901(src string, monthPath string) {
+
+// 給与支給明細書(2019年01月～)のテキストデータ読み込み
+func readSalaryFrom201901(src string, monthPath string) {
 	// 出勤/休出/特休/欠勤
 	pdftotext(src, filepath.Join(monthPath, "salary01.txt"), "-x 70 -y 100 -W 20 -H 60")
 	pdftotext(src, filepath.Join(monthPath, "salary01.txt"), "-x 100 -y 100 -W 20 -H 60")
@@ -108,7 +111,8 @@ func createTextFrom201901(src string, monthPath string) {
 	pdftotext(src, filepath.Join(monthPath, "salary30.txt"), "-x 250 -y 400 -W 800 -H 80")
 }
 
-func createTextFrom202003(src string, monthPath string) {
+// 給与支給明細書(2020年03月～)のテキストデータ読み込み
+func readSalaryFrom202003(src string, monthPath string) {
 	// 出勤/休出/特休/欠勤
 	pdftotext(src, filepath.Join(monthPath, "salary01.txt"), "-x 70 -y 100 -W 30 -H 60")
 	pdftotext(src, filepath.Join(monthPath, "salary01.txt"), "-x 100 -y 100 -W 30 -H 60")
@@ -130,7 +134,8 @@ func createTextFrom202003(src string, monthPath string) {
 	pdftotext(src, filepath.Join(monthPath, "salary30.txt"), "-x 75 -y 440 -W 800 -H 60")
 }
 
-func createTextFrom202005(src string, monthPath string, pages string) {
+// 給与支給明細書(2020年05月～)のテキストデータ読み込み
+func readSalaryFrom202005(src string, monthPath string, pages string) {
 	// 出勤/休出/特休/欠勤
 	pdftotext(src, filepath.Join(monthPath, "salary01.txt"), "-x 70 -y 100 -W 30 -H 60 -f "+pages+" -l "+pages)
 	pdftotext(src, filepath.Join(monthPath, "salary01.txt"), "-x 100 -y 100 -W 30 -H 60 -f "+pages+" -l "+pages)
@@ -152,12 +157,52 @@ func createTextFrom202005(src string, monthPath string, pages string) {
 	pdftotext(src, filepath.Join(monthPath, "salary30.txt"), "-x 75 -y 440 -W 800 -H 60 -f "+pages+" -l "+pages)
 }
 
-func createTextFrom202005S(src string, monthPath string) {
+// 給与支給明細書[賞与](2020年05月～)のテキストデータ読み込み
+func readSalaryFrom202005S(src string, monthPath string) {
 	pdftotext(src, filepath.Join(monthPath, "salary10.txt"), "-x 75 -y 160 -W 800 -H 60")
 	pdftotext(src, filepath.Join(monthPath, "salary20.txt"), "-x 75 -y 280 -W 800 -H 60")
 	pdftotext(src, filepath.Join(monthPath, "salary30.txt"), "-x 75 -y 380 -W 800 -H 60")
 }
 
+// ----------------------------------------------------------------------------
+// 経費等支給明細書データ作成
+func createExpenseData(file fs.FileInfo) {
+	ext := path.Ext(file.Name())
+	if file.IsDir() || ext != ".pdf" {
+		return
+	}
+	r := regexp.MustCompile(`(\d+)年(\d+)月(経費)_.+`)
+	if !r.MatchString(file.Name()) {
+		return
+	}
+
+	month := r.ReplaceAllString(file.Name(), "$1$2")
+	if len(month) == 5 {
+		month = month[:4] + "0" + month[4:]
+	}
+
+	monthPath := filepath.Join(dataPath, month)
+	dist := filepath.Join(monthPath, "expense01.txt")
+	if _, err := os.Stat(dist); !os.IsNotExist(err) {
+		return
+	}
+	os.Mkdir(monthPath, os.ModePerm)
+
+	src := filepath.Join(dataPath, file.Name())
+	println(src)
+
+	// 画像
+	dist = filepath.Join(monthPath, "expense")
+	exec.Command("pdftocairo", src, dist, "-opw", password, "-png").Output()
+
+	pdftotext(src, filepath.Join(monthPath, "expense01.txt"), "-x 300 -y 140 -W 300 -H 40")
+	pdftotext(src, filepath.Join(monthPath, "expense01.txt"), "-x 100 -y 210 -W 800 -H 40")
+	pdftotext(src, filepath.Join(monthPath, "expense01.txt"), "-x 100 -y 250 -W 800 -H 40")
+}
+
+// ----------------------------------------------------------------------------
+
+// pdftotextコマンドの実行し、テキストデータを出力する
 func pdftotext(src string, dist string, opt string) {
 	opt = src + " " + dist + " -opw " + password + " " + opt
 	args := strings.Split(opt, " ")
@@ -172,6 +217,7 @@ func pdftotext(src string, dist string, opt string) {
 	ioutil.WriteFile(dist, []byte(text), fs.ModePerm)
 }
 
+// pdfinfoコマンドを実行し、ページ数を返す
 func pdfinfo(filename string) string {
 	b, err := exec.Command("pdfinfo", filename, "-opw", password).Output()
 	if err != nil {
