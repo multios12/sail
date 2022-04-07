@@ -5,6 +5,7 @@ import (
 	"log"
 	"path/filepath"
 	"regexp"
+	"sort"
 	"strconv"
 	"strings"
 )
@@ -64,6 +65,25 @@ func readMonthDir(dirPath string) DetailModel {
 
 	filename = filepath.Join(dirPath, "salary30.txt")
 	s.Totals, s.IsError = readTextFileToDetailItem(filename)
+
+	filename = filepath.Join(dirPath, "expense01.txt")
+	s.Expense, s.Expenses, s.IsError = readTextFileToExpense(filename)
+
+	files, err := ioutil.ReadDir(dirPath)
+	if err != nil {
+		log.Print(err)
+		return s
+	}
+
+	for _, file := range files {
+		ext := filepath.Ext(file.Name())
+		if file.IsDir() || ext != ".png" {
+			continue
+		}
+		s.Images = append(s.Images, file.Name())
+	}
+	sort.Slice(s.Images, func(i, j int) bool { return s.Images[i] > s.Images[j] })
+
 	return s
 }
 
@@ -171,5 +191,54 @@ func readTextFileToTimeItem(filename string) (items []TimeItem, isErr bool) {
 		items = append(items, item)
 	}
 
+	return
+}
+
+func readTextFileToExpense(filename string) (expense int, expenses []ExpenseItem, isErr bool) {
+	bytes, err := ioutil.ReadFile(filename)
+	if err != nil {
+		return
+	}
+
+	r := regexp.MustCompile("^[\\-,0-9 円]+$")
+
+	text := string(bytes)
+	lines := strings.Split(text, "\n")
+	var targets []string
+	for _, v := range lines {
+		v = strings.ReplaceAll(v, "\f", "")
+		v = strings.ReplaceAll(v, "▲", "-")
+		if len(v) == 0 {
+			continue
+		} else if r.MatchString(v) {
+			v = strings.ReplaceAll(v, ",", "")
+			v = strings.ReplaceAll(v, " 円", "")
+		}
+
+		targets = append(targets, v)
+	}
+
+	r = regexp.MustCompile("^[1-9]$")
+	r2 := regexp.MustCompile("^[0-9]+$")
+	expenseItem := ExpenseItem{}
+	for i, v := range targets {
+		if i == 0 {
+			expense, _ = strconv.Atoi(v)
+		} else if r.MatchString(v) {
+			if len(expenseItem.Name) > 0 {
+				expenses = append(expenses, expenseItem)
+			}
+			expenseItem = ExpenseItem{}
+		} else if expenseItem.Name == "" {
+			expenseItem.Name = v
+		} else if !r2.MatchString(v) {
+			expenseItem.Memo += v
+		} else {
+			expenseItem.Amount, _ = strconv.Atoi(v)
+		}
+	}
+	if len(expenseItem.Name) > 0 {
+		expenses = append(expenses, expenseItem)
+	}
 	return
 }

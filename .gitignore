@@ -5,3 +5,7 @@
 /node_modules
 /package-lock.json
 /srv/__debug_bin.exe
+/srv/static/static
+/srv/static/index.html
+/srv/static/favicon.ico
+/srv/static/asset-manifest.json

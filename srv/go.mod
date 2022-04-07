@@ -1,4 +1,4 @@
-module github.com/multios12/sail/srv
+module github.com/multios12/sail
 
 go 1.18
 

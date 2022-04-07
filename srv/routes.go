@@ -19,7 +19,7 @@ func routerInitial(static embed.FS) *gin.Engine {
 
 	router.GET("/api/:year", getYear)
 	router.GET("/api/:year/:month", getMonth)
-	router.GET("/api/:year/:month/detailImage", getDetailImage)
+	router.GET("/api/:year/:month/images/:file", getDetailImage)
 	return router
 }
 
@@ -84,6 +84,6 @@ func getMonth(c *gin.Context) {
 // 月単位画像 GET API
 func getDetailImage(c *gin.Context) {
 	m := c.Param("year") + c.Param("month")
-	filename := filepath.Join(dataPath, m, "salary.png")
+	filename := filepath.Join(dataPath, m, c.Param("file"))
 	c.File(filename)
 }
