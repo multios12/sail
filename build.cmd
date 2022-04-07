@@ -7,6 +7,8 @@ rmdir /s /Q build
 
 rem build server app
 mkdir dist
-cd srv
+cd convert
+go build -o ../dist
+cd ../srv
 go build -o ../dist
 cd ..

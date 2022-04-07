@@ -6,9 +6,12 @@ robocopy .\build .\srv\static /MIR
 rmdir /s /Q build
 
 rem build server app
-mkdir dist
-cd srv
 set GOOS=linux
 set GOARCH=amd64
+mkdir dist
+cd convert
+go build -o ../dist
+cd ..
+cd srv
 go build -o ../dist 
 cd ..
