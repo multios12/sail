@@ -65,7 +65,7 @@ const MuMonth = () => {
 }
 
 // 詳細項目コンポーネント
-const MuDetailItem = ({item}: Props<DetailItem>) => {
+const MuDetailItem = ({ item }: Props<DetailItem>) => {
   return (
     <div className="column">
       <article className="tile is-child box">

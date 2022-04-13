@@ -3,6 +3,7 @@ package main
 import (
 	"embed"
 	"net/http"
+	"os"
 	"path/filepath"
 	"sort"
 
@@ -19,6 +20,7 @@ func routerInitial(static embed.FS) *gin.Engine {
 
 	router.GET("/api/:year", getYear)
 	router.GET("/api/:year/:month", getMonth)
+	router.PUT("/api/:year/:month", putMonth)
 	router.GET("/api/:year/:month/images/:file", getDetailImage)
 	return router
 }
@@ -79,6 +81,25 @@ func getMonth(c *gin.Context) {
 		}
 	}
 	c.Status(404)
+}
+
+// 月単位データ再作成 PUT API
+func putMonth(c *gin.Context) {
+	m := c.Param("year") + c.Param("month")
+	filename := filepath.Join(dataPath, m)
+
+	if _, err := os.Stat(filename); err == nil {
+		err := os.RemoveAll(filename)
+		if err != nil {
+			c.Status(http.StatusNotFound)
+			return
+		}
+	}
+
+	// PDFファイルの変換とデータ再読み込み
+	convert()
+	details = readAllData(dataPath)
+	c.Status(http.StatusOK)
 }
 
 // 月単位画像 GET API

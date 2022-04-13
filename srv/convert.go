@@ -1,7 +1,6 @@
 package main
 
 import (
-	"flag"
 	"io/fs"
 	"io/ioutil"
 	"log"
@@ -10,19 +9,13 @@ import (
 	"path"
 	"path/filepath"
 	"regexp"
+	"runtime"
 	"strconv"
 	"strings"
 )
 
-var password string
-var dataPath string
-
 // コンテキスト
-func main() {
-	flag.StringVar(&password, "password", "", "PDF password")
-	flag.StringVar(&dataPath, "path", "./data", "data directory")
-	flag.Parse()
-
+func convert() {
 	files, err := ioutil.ReadDir(dataPath)
 	if err != nil {
 		log.Print(err)
@@ -212,14 +205,28 @@ func pdftotext(src string, dist string, opt string) {
 		text = readTextFileToString(dist)
 	}
 
-	exec.Command("pdftotext", args...).Output()
+	command := ""
+	if runtime.GOOS == "windows" {
+		command = "pdftotext.exe"
+	} else {
+		command = "pdftotext"
+	}
+
+	exec.Command(command, args...).Output()
 	text += readTextFileToString(dist)
 	ioutil.WriteFile(dist, []byte(text), fs.ModePerm)
 }
 
 // pdfinfoコマンドを実行し、ページ数を返す
 func pdfinfo(filename string) string {
-	b, err := exec.Command("pdfinfo", filename, "-opw", password).Output()
+	command := ""
+	if runtime.GOOS == "windows" {
+		command = "pdfinfo.exe"
+	} else {
+		command = "pdfinfo"
+	}
+
+	b, err := exec.Command(command, filename, "-opw", password).Output()
 	if err != nil {
 		return "1"
 	}
