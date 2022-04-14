@@ -2,6 +2,7 @@ package main
 
 import (
 	"embed"
+	"io"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -22,6 +23,7 @@ func routerInitial(static embed.FS) *gin.Engine {
 	router.GET("/api/:year/:month", getMonth)
 	router.PUT("/api/:year/:month", putMonth)
 	router.GET("/api/:year/:month/images/:file", getDetailImage)
+	router.POST("/api/files", postFiles)
 	return router
 }
 
@@ -91,14 +93,18 @@ func putMonth(c *gin.Context) {
 	if _, err := os.Stat(filename); err == nil {
 		err := os.RemoveAll(filename)
 		if err != nil {
-			c.Status(http.StatusNotFound)
+			c.Status(http.StatusInternalServerError)
 			return
 		}
 	}
 
 	// PDFファイルの変換とデータ再読み込み
 	convert()
-	details = readAllData(dataPath)
+	var err error
+	details, err = readAllData(dataPath)
+	if err != nil {
+		c.Status(http.StatusInternalServerError)
+	}
 	c.Status(http.StatusOK)
 }
 
@@ -107,4 +113,33 @@ func getDetailImage(c *gin.Context) {
 	m := c.Param("year") + c.Param("month")
 	filename := filepath.Join(dataPath, m, c.Param("file"))
 	c.File(filename)
+}
+
+func postFiles(c *gin.Context) {
+	inFile, header, err := c.Request.FormFile("file")
+	if err != nil {
+		return
+	}
+
+	filename := filepath.Join(dataPath, header.Filename)
+	outFile, err := os.Create(filename)
+	if err != nil {
+		c.Status(http.StatusInternalServerError)
+		return
+	}
+	defer outFile.Close()
+
+	_, err = io.Copy(outFile, inFile)
+	if err != nil {
+		c.Status(http.StatusInternalServerError)
+		return
+	}
+
+	convert()
+	details, err = readAllData(dataPath)
+	if err != nil {
+		c.Status(http.StatusInternalServerError)
+		return
+	}
+	c.Status(http.StatusOK)
 }

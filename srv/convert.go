@@ -3,23 +3,20 @@ package main
 import (
 	"io/fs"
 	"io/ioutil"
-	"log"
 	"os"
 	"os/exec"
 	"path"
 	"path/filepath"
 	"regexp"
-	"runtime"
 	"strconv"
 	"strings"
 )
 
 // コンテキスト
-func convert() {
+func convert() error {
 	files, err := ioutil.ReadDir(dataPath)
 	if err != nil {
-		log.Print(err)
-		return
+		return err
 	}
 
 	for _, file := range files {
@@ -28,6 +25,8 @@ func convert() {
 	for _, file := range files {
 		createExpenseData(file)
 	}
+
+	return nil
 }
 
 // 給与支給明細書データの作成
@@ -96,8 +95,8 @@ func readSalaryFrom201901(src string, monthPath string) {
 	pdftotext(src, filepath.Join(monthPath, "salary02.txt"), "-x 260 -y 110 -W 190 -H 60")
 	pdftotext(src, filepath.Join(monthPath, "salary02.txt"), "-x 450 -y 110 -W 500 -H 60")
 	// 支給
-	pdftotext(src, filepath.Join(monthPath, "salary10.txt"), "-x 85 -y 170 -W 650 -H 80")
-	pdftotext(src, filepath.Join(monthPath, "salary10.txt"), "-x 85 -y 240 -W 650 -H 60")
+	pdftotext(src, filepath.Join(monthPath, "salary10.txt"), "-x 85 -y 170 -W 640 -H 80")
+	pdftotext(src, filepath.Join(monthPath, "salary10.txt"), "-x 85 -y 220 -W 640 -H 60")
 	// 控除
 	pdftotext(src, filepath.Join(monthPath, "salary20.txt"), "-x 75 -y 280 -W 800 -H 100")
 	// 合計
@@ -205,12 +204,7 @@ func pdftotext(src string, dist string, opt string) {
 		text = readTextFileToString(dist)
 	}
 
-	command := ""
-	if runtime.GOOS == "windows" {
-		command = "pdftotext.exe"
-	} else {
-		command = "pdftotext"
-	}
+	command := "pdftotext"
 
 	exec.Command(command, args...).Output()
 	text += readTextFileToString(dist)
@@ -219,12 +213,7 @@ func pdftotext(src string, dist string, opt string) {
 
 // pdfinfoコマンドを実行し、ページ数を返す
 func pdfinfo(filename string) string {
-	command := ""
-	if runtime.GOOS == "windows" {
-		command = "pdfinfo.exe"
-	} else {
-		command = "pdfinfo"
-	}
+	command := "pdfinfo"
 
 	b, err := exec.Command(command, filename, "-opw", password).Output()
 	if err != nil {
@@ -252,6 +241,7 @@ func readTextFileToString(filename string) string {
 
 	text := string(bytes)
 	text = strings.ReplaceAll(text, "\f", "")
+	text = strings.ReplaceAll(text, "\r\n", "\n")
 
 	return text
 }

@@ -10,11 +10,11 @@ import (
 	"strings"
 )
 
-func readAllData(dataPath string) []DetailModel {
+func readAllData(dataPath string) ([]DetailModel, error) {
 	files, err := ioutil.ReadDir(dataPath)
 	if err != nil {
 		log.Print(err)
-		return nil
+		return nil, err
 	}
 
 	details := []DetailModel{}
@@ -36,7 +36,7 @@ func readAllData(dataPath string) []DetailModel {
 		d := readMonthDir(monthDir)
 		details = append(details, d)
 	}
-	return details
+	return details, nil
 }
 
 // 年月ディレクトリを読み込み、明細モデルを返す

@@ -1,8 +1,8 @@
 // 給与支給明細書モデル
 export type DetailModel = {
     Month: string;       // 年月
-    Title: string;  // タイトル
-    IsError: boolean;         // 取得エラー
+    Title?: string;  // タイトル
+    IsError?: boolean;         // 取得エラー
     Counts: DetailItem[]; // 日数配列
     Times: TimeItem[]   // 時間配列
     Salarys: DetailItem[] // 支給配列

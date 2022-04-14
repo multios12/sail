@@ -20,7 +20,7 @@
             "request": "launch",
             "mode": "auto",
             "program": "srv/.",
-            "args": ["-port", ":3001","-path", "../data" ],
+            "args": ["-port", ":3001","-datapath", "../data" ],
         }
     ]
 }

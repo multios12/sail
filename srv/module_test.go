@@ -5,7 +5,7 @@ import (
 )
 
 func TestReadAllData(t *testing.T) {
-	v := readAllData("../../data/")
+	v, _ := readAllData("../../data/")
 	if len(v) == 0 {
 		t.Fail()
 	}

@@ -5,6 +5,7 @@ import (
 	"flag"
 	"os"
 	"path/filepath"
+	"strings"
 )
 
 // 明細リスト
@@ -25,8 +26,13 @@ var static embed.FS
 func main() {
 	flag.BoolVar(&isConvertMode, "convert", false, "true is PDF convert mode")
 	flag.StringVar(&password, "password", "", "PDF password")
-	flag.StringVar(&dataPath, "path", "./data", "data directory")
+	flag.StringVar(&dataPath, "datapath", "./data", "data directory")
 	port := flag.String("port", ":3000", "server port")
+	flag.VisitAll(func(f *flag.Flag) {
+		if s := os.Getenv(strings.ToUpper(f.Name)); s != "" {
+			f.Value.Set(s)
+		}
+	})
 	flag.Parse()
 
 	dataPath, _ = filepath.Abs(dataPath)
@@ -40,7 +46,12 @@ func main() {
 		return
 	}
 
-	details = readAllData(dataPath)
+	var err error
+	details, err = readAllData(dataPath)
+	if err != nil {
+		println(err)
+		return
+	}
 
 	router := routerInitial(static)
 	router.Run(*port)

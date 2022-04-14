@@ -1,14 +1,34 @@
 import axios from "axios";
-import { useEffect, useState } from "react";
+import { MouseEventHandler, useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { DetailItem, DetailModel } from "./models"
 type Props<T> = {
   item: T
 }
 const MuMonth = () => {
-  const item: DetailModel = { Month: '202201', Title: "", IsError: false, Counts: [], Times: [], Salarys: [], Costs: [], Totals: [], Expense: 0, Expenses: [], Images: [] }
+  const item: DetailModel = { Month: '202201', Counts: [], Times: [], Salarys: [], Costs: [], Totals: [], Expense: 0, Expenses: [], Images: [] }
   const { year, month } = useParams();
   const [model, setModel] = useState(item);
+
+  const refreshClick = (e: any) => {
+    const t = e.target as HTMLButtonElement
+
+    t.classList.add("is-loading")
+    document.querySelector(".card-content")?.classList.add("is-hidden")
+    const url = `./api/${year}/${month}`
+    axios.put(url).then(r => {
+      const url = `./api/${year}/${month}`
+      axios.get(url).then(r => {
+        setModel(r.data)
+      }).finally(() => {
+        t.classList.remove("is-loading")
+        document.querySelector(".card-content")?.classList.remove("is-hidden")
+      })
+    }).catch(() => {
+      t.classList.remove("is-loading")
+      document.querySelector(".card-content")?.classList.remove("is-hidden")
+    })
+  }
 
   useEffect(() => {
     const url = `./api/${year}/${month}`
@@ -20,7 +40,9 @@ const MuMonth = () => {
   return (
     <div className="card px-10">
       <div className="card-header">
-        <div className="card-header-title">{model.Title}</div>
+        <div className="card-header-title">{model.Title}
+          <div className="control px-5"><button className="button is-info" onClick={refreshClick}><span className="material-icons"> refresh </span></button></div>
+        </div>
       </div>
       <div className="card-content">
         <table className="table is-fullwidth">
