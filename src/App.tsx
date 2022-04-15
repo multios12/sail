@@ -1,8 +1,8 @@
 import { Route, HashRouter as Router, Routes } from 'react-router-dom';
 import './App.css';
-import AppBar from "./MuAppBar";
-import MuMonth from './MuMonth';
-import MuYear from './MuYear';
+import AppBar from "./components/MuAppBar";
+import MuSalaryYear from './components/MuSalaryYear';
+import MuSalaryMonth from './components/MuSalaryMonth';
 
 function App() {
   return (
@@ -10,9 +10,9 @@ function App() {
       <Router>
         <AppBar />
         <Routes>
-          <Route path='/' element={<MuYear />} />
-          <Route path='/:year' element={<MuYear />} />
-          <Route path='/:year/:month' element={<MuMonth />} />
+          <Route path='/' element={<MuSalaryYear />} />
+          <Route path='/:year' element={<MuSalaryYear />} />
+          <Route path='/:year/:month' element={<MuSalaryMonth />} />
         </Routes>
       </Router>
     </div>

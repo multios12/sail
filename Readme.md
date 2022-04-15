@@ -1,17 +1,22 @@
-
-## プログラムの構成
-* convert
-  給与支給明細書をデータファイルに変換する。popplerを使用するため、現在のところubuntsu上で利用する必要がある  
-* sail
-  
+# sail - 給与明細集計  
 
 ## 必要なライブラリ
-* poppler-utils
+### poppler-utils
   https://texwiki.texjp.org/?Poppler#k603e696
 
-## 各種インストール
-### poppler
+### popplerのインストール方法(Ubuntu)
+下記のコマンドを実行
 > sudo apt install poppler-utils poppler-data
+
+### popplerのインストール方法(Windows)
+1. 下記から、Windows用バイナリをダウンロード、任意のフォルダで回答
+https://blog.alivate.com.au/poppler-windows/
+2. 環境変数pathに解凍したバイナリを置いたフォルダを指定
+
+### popplerのPDF→テキスト 変換コマンド
+> pdftotext [pdfファイル] -opw [パスワード]
+
+## プロジェクトの初期構築コマンド
 
 ### create new front react project
 > create-react-app sail --template typescript\
@@ -23,8 +28,3 @@
 > cd srv
 > go mod init github.com/multios12/sail/srv
 > go get modernc.org/sqlite
-
-## popplerのPDF 変換コマンド
-> pdftotext [pdfファイル] -opw [パスワード]
-
-

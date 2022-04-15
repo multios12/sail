@@ -1,14 +1,14 @@
 import 'bulma/css/bulma.css';
-import UploadDialog from "./MuUploadButton"
+import UploadButton from "./MuUploadButton"
 
-export default function MuAppBar() {
+export default () => {
   return (
     <header className="navbar is-dark">
       <div className="navbar-brand">
         <span className="navbar-item">sail</span>
       </div>
       <div className="navbar-end">
-        <UploadDialog />
+        <UploadButton />
       </div>
     </header>
   )

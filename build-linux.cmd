@@ -9,9 +9,6 @@ rem build server app
 set GOOS=linux
 set GOARCH=amd64
 mkdir dist
-cd convert
-go build -o ../dist
-cd ..
 cd srv
 go build -o ../dist 
 cd ..

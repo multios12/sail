@@ -9,7 +9,7 @@ import (
 )
 
 // 明細リスト
-var details []DetailModel
+var details []SalaryMonthModel
 
 // クロールモード
 var isConvertMode bool
@@ -38,6 +38,10 @@ func main() {
 	dataPath, _ = filepath.Abs(dataPath)
 	if _, err := os.Stat(dataPath); err != nil {
 		os.Mkdir(dataPath, 0777)
+	}
+
+	if password == "" {
+		println("[warning]パスワードが設定されていないため、明細の取り込みに失敗する可能性があります。")
 	}
 
 	// クロールモード

@@ -10,14 +10,15 @@ import (
 	"strings"
 )
 
-func readAllData(dataPath string) ([]DetailModel, error) {
+// 指定されたディレクトリからデータを読み込み、明細モデルリストを返す
+func readAllData(dataPath string) ([]SalaryMonthModel, error) {
 	files, err := ioutil.ReadDir(dataPath)
 	if err != nil {
 		log.Print(err)
 		return nil, err
 	}
 
-	details := []DetailModel{}
+	details := []SalaryMonthModel{}
 
 	for _, file := range files {
 		exist := false
@@ -40,8 +41,8 @@ func readAllData(dataPath string) ([]DetailModel, error) {
 }
 
 // 年月ディレクトリを読み込み、明細モデルを返す
-func readMonthDir(dirPath string) DetailModel {
-	s := DetailModel{}
+func readMonthDir(dirPath string) SalaryMonthModel {
+	s := SalaryMonthModel{}
 	s.Month = filepath.Base(dirPath)
 
 	s.Title = s.Month[:4] + "年" + s.Month[4:6] + "月"
@@ -67,7 +68,7 @@ func readMonthDir(dirPath string) DetailModel {
 	s.Totals, s.IsError = readTextFileToDetailItem(filename)
 
 	filename = filepath.Join(dirPath, "expense01.txt")
-	s.Expense, s.Expenses, s.IsError = readTextFileToExpense(filename)
+	s.Expense, s.Expenses, s.IsError = readTextFileToExpenseItem(filename)
 
 	files, err := ioutil.ReadDir(dirPath)
 	if err != nil {
@@ -194,7 +195,8 @@ func readTextFileToTimeItem(filename string) (items []TimeItem, isErr bool) {
 	return
 }
 
-func readTextFileToExpense(filename string) (expense int, expenses []ExpenseItem, isErr bool) {
+// テキストファイルの読み込みと解析を行い、ExpenseItemを返す
+func readTextFileToExpenseItem(filename string) (expense int, expenses []ExpenseItem, isErr bool) {
 	bytes, err := ioutil.ReadFile(filename)
 	if err != nil {
 		return

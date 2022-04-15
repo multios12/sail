@@ -1,19 +1,21 @@
 import axios from "axios";
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import { DetailItem, DetailModel, YearModel } from "./models";
+import { DetailItem, SalaryMonthModel, SalaryModel } from "../models";
 
+/** 汎用Props */
 type Props<T> = {
   Value: T
 }
 
-type MonthProps = {
-  year: string
-  model: YearModel
+/** 年表示カードProps */
+type YearCardProps = {
+  Year: string
+  Model: SalaryModel
 }
 
-// リストコンポーネント
-const MuYear = () => {
+/** 給与収入（年集計）コンポーネント */
+export default () => {
   const { year } = useParams();
   const [model, setModel] = useState({ Year: '2022', Details: [], Totals: [], EnableYears: [] });
 
@@ -25,12 +27,13 @@ const MuYear = () => {
   }, [year]);
   return (
     <div>
-      {model.EnableYears.map(year => <MuListMonth key={year} year={year} model={model} />)}
+      {model.EnableYears.map(year => <MuYearCard key={year} Year={year} Model={model} />)}
     </div>
   )
 }
 
-const MuListMonth = ({ year, model }: MonthProps) => {
+/** 年表示カードコンポーネント */
+const MuYearCard = ({ Year: year, Model: model }: YearCardProps) => {
   if (year == model.Year) {
     return (
       <div key={model.Year} className="card px-10">
@@ -39,7 +42,7 @@ const MuListMonth = ({ year, model }: MonthProps) => {
         </div>
         <div className="card-content">
           <nav className="level">
-            {model.Totals?.map(v => <MuTotalItem key={v.Name} Value={v} />)}
+            {model.Totals?.map(v => <MuTotalTile key={v.Name} Value={v} />)}
           </nav>
           <table className="table is-striped is-hoverable">
             <thead>
@@ -52,7 +55,7 @@ const MuListMonth = ({ year, model }: MonthProps) => {
               </tr>
             </thead>
             <tbody>
-              {model.Details?.map(v => <MuListItem key={v.Month} Value={v} />)}
+              {model.Details?.map(v => <MuMonthTr key={v.Month} Value={v} />)}
             </tbody>
           </table>
         </div>
@@ -69,8 +72,8 @@ const MuListMonth = ({ year, model }: MonthProps) => {
   }
 }
 
-// 合計表示コンポーネント
-const MuTotalItem = ({Value}: Props<DetailItem>) => {
+/** 合計表示タイルコンポーネント */
+const MuTotalTile = ({Value}: Props<DetailItem>) => {
   return (
     <article className="tile is-child box">
       <p className="is-size-6">{Value.Name}</p>
@@ -79,18 +82,15 @@ const MuTotalItem = ({Value}: Props<DetailItem>) => {
   )
 }
 
-// リストアイテムコンポーネント
-const MuListItem = (props: Props<DetailModel>) => {
-  const model = props.Value
+/** 月ごと表示テーブル行コンポーネント */
+const MuMonthTr = ({Value}: Props<SalaryMonthModel>) => {
   return (
-    <tr key={model.Month} className={model.IsError ? 'has-background-danger-light' : ''}>
-      <td><a href={`#/${model.Month.substring(0, 4)}/${model.Month.substring(4)}`}>{model.Title}</a></td>
-      <td>{model.Totals ? model.Totals[0].Value.toLocaleString() : 0}</td>
-      <td>{model.Totals ? model.Totals[2].Value.toLocaleString() : 0}</td>
-      <td>{model.Month.length == 6 ? model.Expense.toLocaleString() : ""}</td>
-      <td>{model.Month.length == 6 ? model.Counts ? model.Counts[0].Value : 0 : ""}</td>
+    <tr key={Value.Month} className={Value.IsError ? 'has-background-danger-light' : ''}>
+      <td><a href={`#/${Value.Month.substring(0, 4)}/${Value.Month.substring(4)}`}>{Value.Title}</a></td>
+      <td>{Value.Totals ? Value.Totals[0].Value.toLocaleString() : 0}</td>
+      <td>{Value.Totals ? Value.Totals[2].Value.toLocaleString() : 0}</td>
+      <td>{Value.Month.length == 6 ? Value.Expense.toLocaleString() : ""}</td>
+      <td>{Value.Month.length == 6 ? Value.Counts ? Value.Counts[0].Value : 0 : ""}</td>
     </tr>
   )
 }
-
-export default MuYear

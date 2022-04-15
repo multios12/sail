@@ -1,37 +1,62 @@
-// 給与支給明細書モデル
-export type DetailModel = {
-    Month: string;       // 年月
-    Title?: string;  // タイトル
-    IsError?: boolean;         // 取得エラー
-    Counts: DetailItem[]; // 日数配列
-    Times: TimeItem[]   // 時間配列
-    Salarys: DetailItem[] // 支給配列
-    Costs: DetailItem[] // 控除配列
-    Totals: DetailItem[] // 合計配列
-    Expense: number            // 経費等支給合計額
-    Expenses: ExpenseItem[] // 経費内訳配列
-    Images: string[]      // 画像ファイル配列
+/** 給与支給明細書（集計）モデル */
+export type SalaryModel = {
+  /** 年 */
+  Year: string
+  /** 利用可能な年のリスト */
+  EnableYears: string[]
+  /** 合計配列 */
+  Totals: DetailItem[]
+  /** 月ごとの給与支給明細リスト */
+  Details: SalaryMonthModel[]
 }
 
+/** 給与支給明細書モデル */
+export type SalaryMonthModel = {
+  /** 年月 */
+  Month: string
+  /** タイトル */
+  Title?: string
+  /** 取得エラー */
+  IsError?: false
+  /** 勤務日数等配列 */
+  Counts: DetailItem[]
+  /** 業務時間等配列 */
+  Times: TimeItem[]
+  /** 支給金額配列 */
+  Salarys: DetailItem[]
+  /** 控除金額配列 */
+  Costs: DetailItem[]
+  /** 合計金額配列 */
+  Totals: DetailItem[]
+  /** 経費等支給合計額 */
+  Expense: number
+  /** 経費内訳配列 */
+  Expenses: ExpenseItem[]
+  /** 画像ファイル配列 */
+  Images: string[]
+}
+
+/** 詳細項目 */
 export type DetailItem = {
-    Name: string;
-    Value: number;
+  /** 項目名 */
+  Name: string
+  /** 金額 */
+  Value: 0
 }
 
+/** 時間項目 */
 export type TimeItem = {
-    Name: string;
-    Value: string;
+  /** 項目名 */
+  Name: string
+  Value: string
 }
 
+/** 経費項目 */
 export type ExpenseItem = {
-    Name: string // 項目名
-    Amount: number    // 金額
-    Memo: string // 備考
-}
-
-export type YearModel = {
-    Year: string        // 年
-    EnableYears: string[]    // 利用可能な年のリスト
-    Totals: DetailItem[]  // 合計リスト
-    Details: DetailModel[] // 月ごとの給与支給明細リスト
+  /** 項目名 */
+  Name: string
+  /** 金額 */
+  Amount: number
+  /** 備考 */
+  Memo: string
 }

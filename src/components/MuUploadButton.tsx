@@ -2,7 +2,9 @@ import axios from 'axios';
 import 'bulma/css/bulma.css';
 import { useState } from 'react';
 
-export default function MuUploadButton() {
+/** アップロードダイアログボタン */
+export default () => {
+  /** メッセージ */
   const [message, setMessage] = useState('')
 
   /** ファイル選択イベント */

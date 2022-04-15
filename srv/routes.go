@@ -33,7 +33,7 @@ func getStatic(c *gin.Context) {
 
 // 年単位データ GET API
 func getYear(c *gin.Context) {
-	y := YearModel{Year: c.Param("year")}
+	y := SalaryYearModel{Year: c.Param("year")}
 
 	for _, detail := range details {
 		isEnabled := false
@@ -115,6 +115,7 @@ func getDetailImage(c *gin.Context) {
 	c.File(filename)
 }
 
+// ファイル保存 POST API
 func postFiles(c *gin.Context) {
 	inFile, header, err := c.Request.FormFile("file")
 	if err != nil {

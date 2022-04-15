@@ -1,12 +1,16 @@
 import axios from "axios";
-import { MouseEventHandler, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import { DetailItem, DetailModel } from "./models"
+import { DetailItem, SalaryMonthModel } from "../models";
+
+/** 汎用Props */
 type Props<T> = {
   item: T
 }
-const MuMonth = () => {
-  const item: DetailModel = { Month: '202201', Counts: [], Times: [], Salarys: [], Costs: [], Totals: [], Expense: 0, Expenses: [], Images: [] }
+
+/** 給与収入（月ごと）コンポーネント */
+export default () => {
+  const item: SalaryMonthModel = {Month:"202010", Counts: [], Times: [], Salarys: [], Costs: [], Totals: [], Expense: 0, Expenses: [], Images: [] }
   const { year, month } = useParams();
   const [model, setModel] = useState(item);
 
@@ -54,7 +58,7 @@ const MuMonth = () => {
               </td>
               <td>
                 <div className="columns">
-                  {model.Salarys?.map(i => <MuDetailItem key={i.Name} item={i} />)}
+                  {model.Salarys?.map(i => <MuDetailTile key={i.Name} item={i} />)}
                 </div>
               </td>
             </tr>
@@ -65,7 +69,7 @@ const MuMonth = () => {
               </td>
               <td>
                 <div className="columns">
-                  {model.Costs?.map(i => <MuDetailItem key={i.Name} item={i} />)}
+                  {model.Costs?.map(i => <MuDetailTile key={i.Name} item={i} />)}
                 </div>
               </td>
             </tr>
@@ -86,8 +90,8 @@ const MuMonth = () => {
   )
 }
 
-// 詳細項目コンポーネント
-const MuDetailItem = ({ item }: Props<DetailItem>) => {
+// 詳細表示タイルコンポーネント
+const MuDetailTile = ({ item }: Props<DetailItem>) => {
   return (
     <div className="column">
       <article className="tile is-child box">
@@ -96,5 +100,3 @@ const MuDetailItem = ({ item }: Props<DetailItem>) => {
       </article>
     </div>)
 }
-
-export default MuMonth
