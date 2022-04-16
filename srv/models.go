@@ -1,5 +1,9 @@
 package main
 
+import (
+	"time"
+)
+
 // 給与支給明細書（集計）モデル
 type SalaryYearModel struct {
 	Year        string             // 年
@@ -40,4 +44,23 @@ type ExpenseItem struct {
 	Name   string // 項目名
 	Amount int    // 金額
 	Memo   string // 備考
+}
+
+// 支出集計モデル
+type SumCost struct {
+	Year        string   // 年
+	EnableYears []string // 利用可能な年のリスト
+	Costs       []Cost   // 月ごとの支出配列
+}
+
+// 支出モデル
+type Cost struct {
+	Month     int       `gorm:"primaryKey"` // 年月(yyyyMM)
+	Water     int       // 水道費
+	Electric  int       // 電気費
+	Gas       int       // ガス費
+	Mobile    int       // 通信費(携帯)
+	Line      int       // 通信費(固定)
+	CreatedAt time.Time // 作成時に値がゼロ値の場合、現在時間がセットされる
+	UpdatedAt time.Time // 更新時、または作成時の値がゼロ値の場合、現在のUNIX秒がセットされる
 }

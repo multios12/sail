@@ -60,3 +60,21 @@ export type ExpenseItem = {
   /** 備考 */
   Memo: string
 }
+
+// 支出集計モデル
+export type SumCostModel= {
+	Year       : string   // 年
+	EnableYears: string[] // 利用可能な年のリスト
+	Costs      : CostModel[]   // 月ごとの支出配列
+}
+
+
+/** 支出モデル */
+export type CostModel = {
+  Month: number      // 年月(yyyyMM)
+  Water: number       // 水道費
+  Electric: number       // 電気費
+  Gas: number       // ガス費
+  Mobile: number       // 通信費(携帯)
+  Line: number       // 通信費(固定)
+}

@@ -26,5 +26,6 @@ https://blog.alivate.com.au/poppler-windows/
 ### create new server golang project
 > mkdir srv
 > cd srv
-> go mod init github.com/multios12/sail/srv
-> go get modernc.org/sqlite
+> go mod init github.com/multios12/sail
+> go get "github.com/glebarez/sqlite"
+> go get "gorm.io/gorm"

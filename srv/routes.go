@@ -6,7 +6,10 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"regexp"
 	"sort"
+	"strconv"
+	"time"
 
 	"github.com/gin-gonic/gin"
 )
@@ -23,6 +26,11 @@ func routerInitial(static embed.FS) *gin.Engine {
 	router.GET("/api/:year/:month", getMonth)
 	router.PUT("/api/:year/:month", putMonth)
 	router.GET("/api/:year/:month/images/:file", getDetailImage)
+
+	router.GET("/api/costs/:year", getCostYear)
+	router.GET("/api/costs/:year/:month", getCostYearMonth)
+	router.POST("/api/costs/:year/:month", postCostYearMonth)
+
 	router.POST("/api/files", postFiles)
 	return router
 }
@@ -113,6 +121,45 @@ func getDetailImage(c *gin.Context) {
 	m := c.Param("year") + c.Param("month")
 	filename := filepath.Join(dataPath, m, c.Param("file"))
 	c.File(filename)
+}
+
+func getCostYear(c *gin.Context) {
+	if costs, err := findCostByYear(c.Param("year")); err != nil {
+		c.Status(http.StatusNotFound)
+	} else {
+		var costYear = SumCost{Year: c.Param(("year")), Costs: costs}
+		var now = time.Now().AddDate(0, 3, 0)
+		for i := now.Year(); i >= 2020; i-- {
+			costYear.EnableYears = append(costYear.EnableYears, strconv.Itoa(i))
+		}
+		c.JSON(http.StatusOK, costYear)
+	}
+}
+
+func getCostYearMonth(c *gin.Context) {
+	value := c.Param("year") + c.Param("month")
+	if cost, err := findCostByMonth(value); err != nil {
+		c.Status(http.StatusNotFound)
+	} else {
+		c.JSON(http.StatusOK, cost)
+	}
+}
+func postCostYearMonth(c *gin.Context) {
+	value := c.Param("year") + c.Param("month")
+	var regmonth = regexp.MustCompile(`^[0-9]{6}$`)
+	if !regmonth.MatchString(value) {
+		c.Status(http.StatusNotFound)
+		return
+	}
+
+	var cost Cost
+	if err := c.ShouldBindJSON(&cost); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	upsertCost(cost)
+	c.Status(http.StatusOK)
 }
 
 // ファイル保存 POST API

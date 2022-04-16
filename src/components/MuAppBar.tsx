@@ -2,14 +2,35 @@ import 'bulma/css/bulma.css';
 import UploadButton from "./MuUploadButton"
 
 export default () => {
+
+  const burgerClick = () => {
+    document.querySelector("#menu")?.classList.toggle('is-active');
+    document.querySelector('.navbar-burger')?.classList.toggle('is-active');
+  }
+
   return (
-    <header className="navbar is-dark">
+    <nav className="navbar is-dark" role="navigation" aria-label="main navigation">
       <div className="navbar-brand">
-        <span className="navbar-item">sail</span>
+        <a className="navbar-item" href="./">sail</a>
+        <a className="navbar-item" href="./#/salary"><i className="material-icons">attach_money</i></a>
+        <a className="navbar-item" href="./#/cost"><i className="material-icons">payment</i></a>
+
+        <a role="button" className="navbar-burger" onClick={burgerClick} aria-label="menu" aria-expanded="false">
+          <span aria-hidden="true"></span>
+          <span aria-hidden="true"></span>
+          <span aria-hidden="true"></span>
+        </a>
       </div>
-      <div className="navbar-end">
-        <UploadButton />
+
+      <div id="menu" className="navbar-menu">
+        <div className="navbar-start">
+        </div>
+
+        <div className="navbar-end">
+          <UploadButton />
+        </div>
       </div>
-    </header>
+
+    </nav>
   )
 }

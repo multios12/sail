@@ -20,7 +20,7 @@ export default () => {
   const [model, setModel] = useState({ Year: '2022', Details: [], Totals: [], EnableYears: [] });
 
   useEffect(() => {
-    const url = `./api/${year ? year : (new Date).getFullYear()}`
+    const url = `./api/${year ?? (new Date).getFullYear()}`
     axios.get(url).then(r => {
       setModel(r.data)
     })
@@ -38,7 +38,7 @@ const MuYearCard = ({ Year: year, Model: model }: YearCardProps) => {
     return (
       <div key={model.Year} className="card px-10">
         <div className="card-header">
-          <div className="card-header-title">{model.Year}年</div>
+          <div className="card-header-title">{model.Year}年収入</div>
         </div>
         <div className="card-content">
           <nav className="level">
@@ -65,7 +65,7 @@ const MuYearCard = ({ Year: year, Model: model }: YearCardProps) => {
     return (
       <div className="card">
         <div className="card-header">
-          <div className="card-header-title"><a href={"#/" + year}>{year}年</a></div>
+          <div className="card-header-title"><a href={"#/salary/" + year}>{year}年</a></div>
         </div>
       </div>
     )
@@ -73,7 +73,7 @@ const MuYearCard = ({ Year: year, Model: model }: YearCardProps) => {
 }
 
 /** 合計表示タイルコンポーネント */
-const MuTotalTile = ({Value}: Props<DetailItem>) => {
+const MuTotalTile = ({ Value }: Props<DetailItem>) => {
   return (
     <article className="tile is-child box">
       <p className="is-size-6">{Value.Name}</p>
@@ -83,10 +83,10 @@ const MuTotalTile = ({Value}: Props<DetailItem>) => {
 }
 
 /** 月ごと表示テーブル行コンポーネント */
-const MuMonthTr = ({Value}: Props<SalaryMonthModel>) => {
+const MuMonthTr = ({ Value }: Props<SalaryMonthModel>) => {
   return (
     <tr key={Value.Month} className={Value.IsError ? 'has-background-danger-light' : ''}>
-      <td><a href={`#/${Value.Month.substring(0, 4)}/${Value.Month.substring(4)}`}>{Value.Title}</a></td>
+      <td><a href={`#/salary/${Value.Month.substring(0, 4)}/${Value.Month.substring(4)}`}>{Value.Title}</a></td>
       <td>{Value.Totals ? Value.Totals[0].Value.toLocaleString() : 0}</td>
       <td>{Value.Totals ? Value.Totals[2].Value.toLocaleString() : 0}</td>
       <td>{Value.Month.length == 6 ? Value.Expense.toLocaleString() : ""}</td>

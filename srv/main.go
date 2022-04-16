@@ -57,6 +57,8 @@ func main() {
 		return
 	}
 
+	dbOpen()
+
 	router := routerInitial(static)
 	router.Run(*port)
 }

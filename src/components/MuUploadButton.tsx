@@ -25,20 +25,15 @@ export default () => {
       .finally(() => document.querySelector("#progress")?.classList.add("is-hidden"))
   }
 
-  /** モーダル表示イベント */
-  const showClick = () => {
-    document.querySelector("#dialog")?.classList.add('is-active');
-  }
-
-  /** モーダル非表示イベント */
-  const closeClick = () => {
-    document.querySelector("#dialog")?.classList.remove('is-active');
+  /** モーダルトグルイベント */
+  const toggleClick = () => {
+    document.querySelector("#dialog")?.classList.toggle('is-active');
   }
 
   return (
     <div className="navbar-item field is-grouped">
       <p className='control nabbar-item '>
-        <a role="button" className="button is-info" onClick={showClick}><span className="material-icons"> file_upload </span>upload</a>
+        <a role="button" className="button is-info" onClick={toggleClick}><span className="material-icons"> file_upload </span>upload</a>
       </p>
 
       <div className="modal" id="dialog">
@@ -46,7 +41,7 @@ export default () => {
         <div className="modal-card">
           <header className="modal-card-head">
             <p className="modal-card-title">明細書 アップロード</p>
-            <button className="delete" aria-label="close" onClick={closeClick}></button>
+            <button className="delete" aria-label="close" onClick={toggleClick}></button>
           </header>
           <section className="modal-card-body">
             {message ?? <div className="notification is-danger">{message}</div>}
