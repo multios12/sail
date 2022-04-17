@@ -4,6 +4,25 @@ import (
 	"time"
 )
 
+//　バランスモデル
+type BalanceYear struct {
+	Year        string        // 年
+	EnableYears []string      // 利用可能な年のリスト
+	Balances    []BalanceItem // バランス配列
+}
+
+// バランス項目
+type BalanceItem struct {
+	Month     string // 年月
+	Salary    int    // 総支給額
+	Paid      int    // 差引支払額
+	Cost      int    // 固定支出額
+	IsNotCost bool   // 固定支出額未入力あり
+	Saving    int    // 貯蓄額
+	Memo      string // メモ
+}
+
+// ----------------------------------------------------------------------------
 // 給与支給明細書（集計）モデル
 type SalaryYearModel struct {
 	Year        string             // 年
@@ -46,6 +65,7 @@ type ExpenseItem struct {
 	Memo   string // 備考
 }
 
+// ----------------------------------------------------------------------------
 // 支出集計モデル
 type SumCost struct {
 	Year        string   // 年
@@ -55,7 +75,7 @@ type SumCost struct {
 
 // 支出モデル
 type Cost struct {
-	Month     int       `gorm:"primaryKey"` // 年月(yyyyMM)
+	Month     string    `gorm:"primaryKey"` // 年月(yyyyMM)
 	Water     int       // 水道費
 	Electric  int       // 電気費
 	Gas       int       // ガス費

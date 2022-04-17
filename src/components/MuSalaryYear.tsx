@@ -17,10 +17,10 @@ type YearCardProps = {
 /** 給与収入（年集計）コンポーネント */
 export default () => {
   const { year } = useParams();
-  const [model, setModel] = useState({ Year: '2022', Details: [], Totals: [], EnableYears: [] });
+  const [model, setModel] = useState({ Year: new Date().getFullYear().toString(), Details: [], Totals: [], EnableYears: [] });
 
   useEffect(() => {
-    const url = `./api/${year ?? (new Date).getFullYear()}`
+    const url = `./api/salary/${year ?? (new Date).getFullYear()}`
     axios.get(url).then(r => {
       setModel(r.data)
     })

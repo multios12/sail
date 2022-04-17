@@ -19,9 +19,9 @@ export default () => {
 
     t.classList.add("is-loading")
     document.querySelector(".card-content")?.classList.add("is-hidden")
-    const url = `./api/${year}/${month}`
+    const url = `./api/salary/${year}/${month}`
     axios.put(url).then(r => {
-      const url = `./api/${year}/${month}`
+      const url = `./api/salary/${year}/${month}`
       axios.get(url).then(r => {
         setModel(r.data)
       }).finally(() => {
@@ -35,7 +35,7 @@ export default () => {
   }
 
   useEffect(() => {
-    const url = `./api/${year}/${month}`
+    const url = `./api/salary/${year}/${month}`
     axios.get(url).then(r => {
       setModel(r.data)
     })
@@ -84,13 +84,13 @@ export default () => {
 
           </tbody>
         </table>
-        {model.Images?.map(i => <img key={i} src={`./api/${year}/${month}/images/${i}`} />)}
+        {model.Images?.map(i => <img key={i} src={`./api/salary/${year}/${month}/images/${i}`} />)}
       </div>
     </div>
   )
 }
 
-// 詳細表示タイルコンポーネント
+/** 詳細表示タイルコンポーネント */
 const MuDetailTile = ({ item }: Props<DetailItem>) => {
   return (
     <div className="column">

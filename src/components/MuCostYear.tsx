@@ -4,19 +4,15 @@ import { MouseEvent, useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { CostModel, SumCostModel } from "../models";
 
-/** 汎用Props */
-type Props<T> = {
-  Value: T
-}
-
-type MuMonthProps<T> = {
+/** 月ごと表示Props */
+type MonthViewProps<T> = {
   onChange: Function
   Value: T
 }
 
 /** 年表示カードProps */
 type YearCardProps = {
-  Year: string | undefined
+  Year: string
   SumCost: SumCostModel
 }
 
@@ -26,7 +22,7 @@ export default () => {
   const [sumCost, setSumCost] = useState<SumCostModel>({ Year: new Date().getFullYear().toString(), EnableYears: [], Costs: [] });
 
   useEffect(() => {
-    const url = `./api/costs/${year ?? (new Date).getFullYear()}`
+    const url = `./api/cost/${year ?? (new Date).getFullYear()}`
     axios.get(url).then(r => {
       setSumCost(r.data)
     })
@@ -78,7 +74,7 @@ const MuYearCard = ({ Year: year, SumCost: sumCost }: YearCardProps) => {
 }
 
 /** 月ごと表示テーブル行コンポーネント */
-const MuMonthViewTr = ({onChange, Value }: MuMonthProps<CostModel>) => {
+const MuMonthViewTr = ({onChange, Value }: MonthViewProps<CostModel>) => {
   const [isEditable, setIsEditable] = useState<boolean>(false)
   const [Water, setWater] = useState<number>(Value.Water)
   const [Electric, setElectric] = useState<number>(Value.Electric)
@@ -87,7 +83,7 @@ const MuMonthViewTr = ({onChange, Value }: MuMonthProps<CostModel>) => {
   const [Line, setLine] = useState<number>(Value.Line)
 
   const saveClick = (e: MouseEvent<HTMLButtonElement>) => {
-    const url = `./api/costs/${Value.Month.toString().substring(0, 4)}/${Value.Month.toString().substring(4)}`
+    const url = `./api/cost/${Value.Month.toString().substring(0, 4)}/${Value.Month.toString().substring(4)}`
     axios.post(url, { Month: Value.Month, Water, Electric, Gas, Mobile, Line })
     setIsEditable(!isEditable)
   }

@@ -1,3 +1,31 @@
+/** バランスモデル */
+export type BalanceYear = {
+  /** 年 */
+  Year: string
+  /** 利用可能な年のリスト */
+  EnableYears: string[]
+  /** バランス配列 */
+  Balances: BalanceItem[]
+}
+
+// バランス項目
+export type BalanceItem = {
+  /** 年月 */
+  Month: string
+  /** 総支給額 */
+  Salary: number
+  /** 差引支払額 */
+  Paid: number
+  /** 固定支出額 */
+  Cost: number
+  /** 固定支出額未入力あり */
+  IsNotCost: boolean
+  /** 貯蓄額 */
+  Saving: number
+  /** メモ */
+  Memo: string
+}
+
 /** 給与支給明細書（集計）モデル */
 export type SalaryModel = {
   /** 年 */
@@ -62,19 +90,27 @@ export type ExpenseItem = {
 }
 
 // 支出集計モデル
-export type SumCostModel= {
-	Year       : string   // 年
-	EnableYears: string[] // 利用可能な年のリスト
-	Costs      : CostModel[]   // 月ごとの支出配列
+export type SumCostModel = {
+  /** 年 */
+  Year: string
+  /** 利用可能な年のリスト */
+  EnableYears: string[]
+  /** 月ごとの支出配列 */
+  Costs: CostModel[]
 }
-
 
 /** 支出モデル */
 export type CostModel = {
-  Month: number      // 年月(yyyyMM)
-  Water: number       // 水道費
-  Electric: number       // 電気費
-  Gas: number       // ガス費
-  Mobile: number       // 通信費(携帯)
-  Line: number       // 通信費(固定)
+  /** 年月(yyyyMM) */
+  Month: number
+  /** 水道費 */
+  Water: number
+  /** 電気費 */
+  Electric: number
+  /** ガス費 */
+  Gas: number
+  /** 通信費(携帯) */
+  Mobile: number
+  /** 通信費(固定) */
+  Line: number
 }

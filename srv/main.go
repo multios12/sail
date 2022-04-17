@@ -9,7 +9,7 @@ import (
 )
 
 // 明細リスト
-var details []SalaryMonthModel
+var salaries []SalaryMonthModel
 
 // クロールモード
 var isConvertMode bool
@@ -51,7 +51,7 @@ func main() {
 	}
 
 	var err error
-	details, err = readAllData(dataPath)
+	salaries, err = readAllData(dataPath)
 	if err != nil {
 		println(err)
 		return

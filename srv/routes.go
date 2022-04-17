@@ -22,28 +22,89 @@ func routerInitial(static embed.FS) *gin.Engine {
 	router.GET("/favicon.ico", getStatic)
 	router.GET("/static/:dir/:file", getStatic)
 
-	router.GET("/api/:year", getYear)
-	router.GET("/api/:year/:month", getMonth)
-	router.PUT("/api/:year/:month", putMonth)
-	router.GET("/api/:year/:month/images/:file", getDetailImage)
+	router.GET("/api/:year", getBalanceYear)
 
-	router.GET("/api/costs/:year", getCostYear)
-	router.GET("/api/costs/:year/:month", getCostYearMonth)
-	router.POST("/api/costs/:year/:month", postCostYearMonth)
+	router.GET("/api/salary/:year", getSalaryYear)
+	router.GET("/api/salary/:year/:month", getSalaryMonth)
+	router.PUT("/api/salary/:year/:month", putSalaryMonth)
+	router.GET("/api/salary/:year/:month/images/:file", getSalaryDetailImage)
+
+	router.GET("/api/cost/:year", getCostYear)
+	router.GET("/api/cost/:year/:month", getCostYearMonth)
+	router.POST("/api/cost/:year/:month", postCostYearMonth)
 
 	router.POST("/api/files", postFiles)
 	return router
 }
 
+// スタティックリソース GET API
 func getStatic(c *gin.Context) {
 	c.FileFromFS("static"+c.Request.URL.Path, http.FS(static))
 }
 
+// 総表示データ GET API
+func getBalanceYear(c *gin.Context) {
+	m := map[string]BalanceItem{}
+
+	for _, salary := range salaries {
+		if c.Param("year") != salary.Month[:4] {
+			continue
+		}
+
+		item, ok := m[salary.Month[:6]]
+		if !ok {
+			item = BalanceItem{Month: salary.Month[:6]}
+		}
+
+		item.Salary += salary.Totals[0].Value + salary.Expense
+		item.Paid += salary.Totals[2].Value + salary.Expense
+		if len(salary.Month) == 7 {
+			item.Memo = "＋賞与"
+		}
+		m[salary.Month[:6]] = item
+	}
+
+	costs, err := findCostByYear(c.Param("year"))
+	if err != nil {
+		c.Status(http.StatusInternalServerError)
+		return
+	}
+
+	for _, c := range costs {
+		item, ok := m[c.Month]
+		if !ok {
+			item = BalanceItem{Month: c.Month}
+		}
+
+		item.Cost = c.Water + c.Electric + c.Gas + c.Mobile + c.Line
+		var nowMonth = strconv.Itoa(int(time.Now().Month()))
+		if len(nowMonth) == 1 {
+			nowMonth = "0" + nowMonth
+		}
+		nowMonth = strconv.Itoa(time.Now().Year()) + nowMonth
+		item.IsNotCost = c.Month < nowMonth && (c.Electric == 0 || c.Gas == 0 || c.Mobile == 0 || c.Line == 0)
+		m[c.Month] = item
+	}
+
+	balances := []BalanceItem{}
+	for _, v := range m {
+		balances = append(balances, v)
+	}
+	sort.Slice(balances, func(i, j int) bool { return balances[i].Month > balances[j].Month })
+
+	model := BalanceYear{Year: c.Param("year"), Balances: balances}
+	var now = time.Now().AddDate(0, 1, 0)
+	for i := now.Year(); i >= 2019; i-- {
+		model.EnableYears = append(model.EnableYears, strconv.Itoa(i))
+	}
+	c.JSON(http.StatusOK, model)
+}
+
 // 年単位データ GET API
-func getYear(c *gin.Context) {
+func getSalaryYear(c *gin.Context) {
 	y := SalaryYearModel{Year: c.Param("year")}
 
-	for _, detail := range details {
+	for _, detail := range salaries {
 		isEnabled := false
 		for _, e := range y.EnableYears {
 			if e == detail.Month[:4] {
@@ -55,7 +116,7 @@ func getYear(c *gin.Context) {
 		}
 	}
 
-	for _, detail := range details {
+	for _, detail := range salaries {
 		if detail.Month[:4] != y.Year {
 			continue
 		}
@@ -82,9 +143,9 @@ func getYear(c *gin.Context) {
 }
 
 // 月単位データ GET API
-func getMonth(c *gin.Context) {
+func getSalaryMonth(c *gin.Context) {
 	m := c.Param("year") + c.Param("month")
-	for _, v := range details {
+	for _, v := range salaries {
 		if v.Month == m {
 			c.JSON(200, v)
 			return
@@ -94,7 +155,7 @@ func getMonth(c *gin.Context) {
 }
 
 // 月単位データ再作成 PUT API
-func putMonth(c *gin.Context) {
+func putSalaryMonth(c *gin.Context) {
 	m := c.Param("year") + c.Param("month")
 	filename := filepath.Join(dataPath, m)
 
@@ -109,7 +170,7 @@ func putMonth(c *gin.Context) {
 	// PDFファイルの変換とデータ再読み込み
 	convert()
 	var err error
-	details, err = readAllData(dataPath)
+	salaries, err = readAllData(dataPath)
 	if err != nil {
 		c.Status(http.StatusInternalServerError)
 	}
@@ -117,18 +178,19 @@ func putMonth(c *gin.Context) {
 }
 
 // 月単位画像 GET API
-func getDetailImage(c *gin.Context) {
+func getSalaryDetailImage(c *gin.Context) {
 	m := c.Param("year") + c.Param("month")
 	filename := filepath.Join(dataPath, m, c.Param("file"))
 	c.File(filename)
 }
 
+// 年単位固定支出データ GET API
 func getCostYear(c *gin.Context) {
 	if costs, err := findCostByYear(c.Param("year")); err != nil {
 		c.Status(http.StatusNotFound)
 	} else {
 		var costYear = SumCost{Year: c.Param(("year")), Costs: costs}
-		var now = time.Now().AddDate(0, 3, 0)
+		var now = time.Now().AddDate(0, 1, 0)
 		for i := now.Year(); i >= 2020; i-- {
 			costYear.EnableYears = append(costYear.EnableYears, strconv.Itoa(i))
 		}
@@ -136,6 +198,7 @@ func getCostYear(c *gin.Context) {
 	}
 }
 
+// 月単位固定支出データ GET API
 func getCostYearMonth(c *gin.Context) {
 	value := c.Param("year") + c.Param("month")
 	if cost, err := findCostByMonth(value); err != nil {
@@ -144,6 +207,8 @@ func getCostYearMonth(c *gin.Context) {
 		c.JSON(http.StatusOK, cost)
 	}
 }
+
+// 月単位固定支出データ POST API
 func postCostYearMonth(c *gin.Context) {
 	value := c.Param("year") + c.Param("month")
 	var regmonth = regexp.MustCompile(`^[0-9]{6}$`)
@@ -184,7 +249,7 @@ func postFiles(c *gin.Context) {
 	}
 
 	convert()
-	details, err = readAllData(dataPath)
+	salaries, err = readAllData(dataPath)
 	if err != nil {
 		c.Status(http.StatusInternalServerError)
 		return
