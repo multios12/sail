@@ -1,12 +1,13 @@
 import './MuCostYear.css';
 import axios from "axios";
-import { MouseEvent, useEffect, useState } from "react";
+import React, { MouseEvent, useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { CostModel, SumCostModel } from "../models";
 
 /** 月ごと表示Props */
 type MonthViewProps<T> = {
-  onChange: Function
+  EditMonth: string
+  SetEditMonth: React.Dispatch<React.SetStateAction<string>>
   Value: T
 }
 
@@ -17,12 +18,12 @@ type YearCardProps = {
 }
 
 /** 支出（年集計）コンポーネント */
-export default () => {
+const MuSalaryYear = () => {
   const { year } = useParams();
   const [sumCost, setSumCost] = useState<SumCostModel>({ Year: new Date().getFullYear().toString(), EnableYears: [], Costs: [] });
 
   useEffect(() => {
-    const url = `./api/cost/${year ?? (new Date).getFullYear()}`
+    const url = `./api/cost/${year ?? (new Date()).getFullYear()}`
     axios.get(url).then(r => {
       setSumCost(r.data)
     })
@@ -36,6 +37,9 @@ export default () => {
 
 /** 年表示カードコンポーネント */
 const MuYearCard = ({ Year: year, SumCost: sumCost }: YearCardProps) => {
+  // 現在編集している行
+  const [editMonth, setEditMonth] = useState<string>("")
+
   if (year === sumCost.Year) {
     return (
       <div key={sumCost.Year} className="card px-10">
@@ -56,7 +60,7 @@ const MuYearCard = ({ Year: year, SumCost: sumCost }: YearCardProps) => {
               </tr>
             </thead>
             <tbody>
-              {sumCost.Costs.map(v => <MuMonthViewTr key={v.Month} Value={v} onChange={()=> {console.log("")}} />)}
+              {sumCost.Costs.map(v => <MuMonthViewTr key={v.Month} Value={v} EditMonth={editMonth} SetEditMonth={setEditMonth} />)}
             </tbody>
           </table>
         </div>
@@ -74,39 +78,48 @@ const MuYearCard = ({ Year: year, SumCost: sumCost }: YearCardProps) => {
 }
 
 /** 月ごと表示テーブル行コンポーネント */
-const MuMonthViewTr = ({onChange, Value }: MonthViewProps<CostModel>) => {
-  const [isEditable, setIsEditable] = useState<boolean>(false)
-  const [Water, setWater] = useState<number>(Value.Water)
-  const [Electric, setElectric] = useState<number>(Value.Electric)
-  const [Gas, setGas] = useState<number>(Value.Gas)
-  const [Mobile, setMobile] = useState<number>(Value.Mobile)
-  const [Line, setLine] = useState<number>(Value.Line)
+const MuMonthViewTr = (props: MonthViewProps<CostModel>) => {
+  const [Water, setWater] = useState<number>(props.Value.Water)
+  const [Electric, setElectric] = useState<number>(props.Value.Electric)
+  const [Gas, setGas] = useState<number>(props.Value.Gas)
+  const [Mobile, setMobile] = useState<number>(props.Value.Mobile)
+  const [Line, setLine] = useState<number>(props.Value.Line)
+
+  useEffect(() => {
+    if (props.EditMonth === "" || props.EditMonth === props.Value.Month) {
+      document.querySelector(`#edit${props.Value.Month}`)?.classList.remove("is-hidden")
+    } else {
+      document.querySelector(`#edit${props.Value.Month}`)?.classList.add("is-hidden")
+    }
+
+  }, [props.Value.Month, props.EditMonth]);
 
   const saveClick = (e: MouseEvent<HTMLButtonElement>) => {
-    const url = `./api/cost/${Value.Month.toString().substring(0, 4)}/${Value.Month.toString().substring(4)}`
-    axios.post(url, { Month: Value.Month, Water, Electric, Gas, Mobile, Line })
-    setIsEditable(!isEditable)
+    const url = `./api/cost/${props.Value.Month.toString().substring(0, 4)}/${props.Value.Month.toString().substring(4)}`
+    axios.post(url, { Month: props.Value.Month, Water, Electric, Gas, Mobile, Line })
+    props.SetEditMonth("")
   }
-  return (isEditable ?
-    <tr key={Value.Month}>
-      <td>{`${Value.Month.toString().substring(0, 4)}年${Value.Month.toString().substring(4)}月`}</td>
+  return (props.EditMonth === props.Value.Month ?
+    <tr key={props.Value.Month}>
+      <td>{`${props.Value.Month.substring(0, 4)}年${props.Value.Month.substring(4)}月`}</td>
       <td className="MuNumber px-0 has-text-right">{Water + Electric + Gas + Mobile + Line}</td>
-      <td className="MuNumber p-0 has-text-right">{<input type="number" className="input px-0 has-text-right" value={Water} onChange={e => setWater(Number(e.target.value))} />}</td>
-      <td className="MuNumber p-0 has-text-right">{<input type="number" className="input px-0 has-text-right" value={Electric} onChange={e => setElectric(Number(e.target.value))} />}</td>
-      <td className="MuNumber p-0 has-text-right">{<input type="number" className="input px-0 has-text-right" value={Gas} onChange={e => setGas(Number(e.target.value))} />}</td>
-      <td className="MuNumber p-0 has-text-right">{<input type="number" className="input px-0 has-text-right" value={Mobile} onChange={e => setMobile(Number(e.target.value))} />}</td>
-      <td className="MuNumber p-0 has-text-right">{<input type="number" className="input px-0 has-text-right" value={Line} onChange={e => setLine(Number(e.target.value))} />}</td>
+      <td className="MuNumber p-0 has-text-right"><input type="number" className="input px-0 has-text-right" value={Water} onChange={e => setWater(Number(e.target.value))} /></td>
+      <td className="MuNumber p-0 has-text-right"><input type="number" className="input px-0 has-text-right" value={Electric} onChange={e => setElectric(Number(e.target.value))} /></td>
+      <td className="MuNumber p-0 has-text-right"><input type="number" className="input px-0 has-text-right" value={Gas} onChange={e => setGas(Number(e.target.value))} /></td>
+      <td className="MuNumber p-0 has-text-right"><input type="number" className="input px-0 has-text-right" value={Mobile} onChange={e => setMobile(Number(e.target.value))} /></td>
+      <td className="MuNumber p-0 has-text-right"><input type="number" className="input px-0 has-text-right" value={Line} onChange={e => setLine(Number(e.target.value))} /></td>
       <td>{<button className="button is-primary is-small material-icons" onClick={saveClick}>save</button>}</td>
     </tr>
-    : <tr onClick={() => { setIsEditable(!isEditable) }}>
-      <td>{`${Value.Month.toString().substring(0, 4)}年${Value.Month.toString().substring(4)}月`}</td>
+    : <tr>
+      <td>{`${props.Value.Month.substring(0, 4)}年${props.Value.Month.substring(4)}月`}</td>
       <td className="MuNumber px-0 has-text-right">{Water + Electric + Gas + Mobile + Line}</td>
       <td className="MuNumber px-0 has-text-right pr-4">{Water}</td>
       <td className="MuNumber px-0 has-text-right pr-4">{Electric}</td>
       <td className="MuNumber px-0 has-text-right pr-4">{Gas}</td>
       <td className="MuNumber px-0 has-text-right pr-4">{Mobile}</td>
       <td className="MuNumber px-0 has-text-right pr-4">{Line}</td>
-      <td><button className="button is-info is-small is-inverted material-icons" onClick={() => {onChange(); setIsEditable(!isEditable) }}>edit</button></td>
+      <td><button id={"edit" + props.Value.Month} className="button is-info is-small is-inverted material-icons" onClick={() => { props.SetEditMonth(props.Value.Month) }}>edit</button></td>
     </tr>
   )
 }
+export default MuSalaryYear

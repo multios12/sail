@@ -15,12 +15,12 @@ type YearCardProps = {
 }
 
 /** 総合表示コンポーネント */
-export default () => {
+const MuHome= () => {
   const { year } = useParams();
   const [model, setModel] = useState({ Year: new Date().getFullYear().toString(), Balances: [], EnableYears: [] });
 
   useEffect(() => {
-    const url = `./api/${year ?? (new Date).getFullYear()}`
+    const url = `./api/${year ?? (new Date()).getFullYear()}`
     axios.get(url).then(r => {
       setModel(r.data)
     })
@@ -34,7 +34,7 @@ export default () => {
 
 /** 年表示カードコンポーネント */
 const MuYearCard = ({ Year: year, Balance: model }: YearCardProps) => {
-  if (year == model.Year) {
+  if (year === model.Year) {
     return (
       <div key={model.Year} className="card px-10">
         <div className="card-header">
@@ -85,3 +85,5 @@ const MuMonthTr = ({ Value }: Props<BalanceItem>) => {
     </tr>
   )
 }
+
+export default MuHome

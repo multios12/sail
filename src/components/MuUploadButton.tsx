@@ -3,7 +3,7 @@ import 'bulma/css/bulma.css';
 import { useState } from 'react';
 
 /** アップロードダイアログボタン */
-export default () => {
+const MuUploadButton = () => {
   /** メッセージ */
   const [message, setMessage] = useState('')
 
@@ -33,7 +33,7 @@ export default () => {
   return (
     <div className="navbar-item field is-grouped">
       <p className='control nabbar-item '>
-        <a role="button" className="button is-info" onClick={toggleClick}><span className="material-icons"> file_upload </span>upload</a>
+        <button className="button is-info" onClick={toggleClick}><span className="material-icons"> file_upload </span>upload</button>
       </p>
 
       <div className="modal" id="dialog">
@@ -65,3 +65,4 @@ export default () => {
     </div>
   )
 }
+export default MuUploadButton

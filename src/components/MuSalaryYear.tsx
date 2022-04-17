@@ -15,12 +15,12 @@ type YearCardProps = {
 }
 
 /** 給与収入（年集計）コンポーネント */
-export default () => {
+const MuSalaryYear= () => {
   const { year } = useParams();
   const [model, setModel] = useState({ Year: new Date().getFullYear().toString(), Details: [], Totals: [], EnableYears: [] });
 
   useEffect(() => {
-    const url = `./api/salary/${year ?? (new Date).getFullYear()}`
+    const url = `./api/salary/${year ?? (new Date()).getFullYear()}`
     axios.get(url).then(r => {
       setModel(r.data)
     })
@@ -34,7 +34,7 @@ export default () => {
 
 /** 年表示カードコンポーネント */
 const MuYearCard = ({ Year: year, Model: model }: YearCardProps) => {
-  if (year == model.Year) {
+  if (year === model.Year) {
     return (
       <div key={model.Year} className="card px-10">
         <div className="card-header">
@@ -89,8 +89,10 @@ const MuMonthTr = ({ Value }: Props<SalaryMonthModel>) => {
       <td><a href={`#/salary/${Value.Month.substring(0, 4)}/${Value.Month.substring(4)}`}>{Value.Title}</a></td>
       <td>{Value.Totals ? Value.Totals[0].Value.toLocaleString() : 0}</td>
       <td>{Value.Totals ? Value.Totals[2].Value.toLocaleString() : 0}</td>
-      <td>{Value.Month.length == 6 ? Value.Expense.toLocaleString() : ""}</td>
-      <td>{Value.Month.length == 6 ? Value.Counts ? Value.Counts[0].Value : 0 : ""}</td>
+      <td>{Value.Month.length === 6 ? Value.Expense.toLocaleString() : ""}</td>
+      <td>{Value.Month.length === 6 ? Value.Counts ? Value.Counts[0].Value : 0 : ""}</td>
     </tr>
   )
 }
+
+export default MuSalaryYear

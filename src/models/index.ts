@@ -102,7 +102,7 @@ export type SumCostModel = {
 /** 支出モデル */
 export type CostModel = {
   /** 年月(yyyyMM) */
-  Month: number
+  Month: string
   /** 水道費 */
   Water: number
   /** 電気費 */

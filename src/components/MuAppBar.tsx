@@ -1,7 +1,7 @@
 import 'bulma/css/bulma.css';
 import UploadButton from "./MuUploadButton"
 
-export default () => {
+const MuAppBar = () => {
 
   const burgerClick = () => {
     document.querySelector("#menu")?.classList.toggle('is-active');
@@ -15,11 +15,11 @@ export default () => {
         <a className="navbar-item" href="./#/salary"><i className="material-icons">attach_money</i></a>
         <a className="navbar-item" href="./#/cost"><i className="material-icons">payment</i></a>
 
-        <a role="button" className="navbar-burger" onClick={burgerClick} aria-label="menu" aria-expanded="false">
+        <button className="navbar-burger" onClick={burgerClick} aria-label="menu" aria-expanded="false">
           <span aria-hidden="true"></span>
           <span aria-hidden="true"></span>
           <span aria-hidden="true"></span>
-        </a>
+        </button>
       </div>
 
       <div id="menu" className="navbar-menu">
@@ -34,3 +34,4 @@ export default () => {
     </nav>
   )
 }
+export default MuAppBar

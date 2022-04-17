@@ -9,7 +9,7 @@ type Props<T> = {
 }
 
 /** 給与収入（月ごと）コンポーネント */
-export default () => {
+const MuSalaryMonth =() => {
   const item: SalaryMonthModel = {Month:"202010", Counts: [], Times: [], Salarys: [], Costs: [], Totals: [], Expense: 0, Expenses: [], Images: [] }
   const { year, month } = useParams();
   const [model, setModel] = useState(item);
@@ -84,7 +84,7 @@ export default () => {
 
           </tbody>
         </table>
-        {model.Images?.map(i => <img key={i} src={`./api/salary/${year}/${month}/images/${i}`} />)}
+        {model.Images?.map(i => <img key={i} src={`./api/salary/${year}/${month}/images/${i}`} alt="salary" />)}
       </div>
     </div>
   )
@@ -100,3 +100,5 @@ const MuDetailTile = ({ item }: Props<DetailItem>) => {
       </article>
     </div>)
 }
+
+export default MuSalaryMonth
