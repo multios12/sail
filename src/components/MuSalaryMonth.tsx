@@ -21,14 +21,8 @@ const MuSalaryMonth =() => {
     document.querySelector(".card-content")?.classList.add("is-hidden")
     const url = `./api/salary/${year}/${month}`
     axios.put(url).then(r => {
-      const url = `./api/salary/${year}/${month}`
-      axios.get(url).then(r => {
         setModel(r.data)
-      }).finally(() => {
-        t.classList.remove("is-loading")
-        document.querySelector(".card-content")?.classList.remove("is-hidden")
-      })
-    }).catch(() => {
+    }).finally(() => {
       t.classList.remove("is-loading")
       document.querySelector(".card-content")?.classList.remove("is-hidden")
     })

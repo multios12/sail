@@ -20,6 +20,18 @@ export type BalanceItem = {
   Cost: number
   /** 固定支出額未入力あり */
   IsNotCost: boolean
+  /** 水道費 */
+  CostWater: number
+  /** 電気費 */
+  CostElectric: number
+  /** ガス費 */
+  CostGas: number
+  /** 通信費(携帯) */
+  CostMobile: number
+  /** 通信費(固定) */
+  CostLine: number
+  /** 納税額 */
+  CostTax: number
   /** 貯蓄額 */
   Saving: number
   /** メモ */
@@ -87,30 +99,4 @@ export type ExpenseItem = {
   Amount: number
   /** 備考 */
   Memo: string
-}
-
-// 支出集計モデル
-export type SumCostModel = {
-  /** 年 */
-  Year: string
-  /** 利用可能な年のリスト */
-  EnableYears: string[]
-  /** 月ごとの支出配列 */
-  Costs: CostModel[]
-}
-
-/** 支出モデル */
-export type CostModel = {
-  /** 年月(yyyyMM) */
-  Month: string
-  /** 水道費 */
-  Water: number
-  /** 電気費 */
-  Electric: number
-  /** ガス費 */
-  Gas: number
-  /** 通信費(携帯) */
-  Mobile: number
-  /** 通信費(固定) */
-  Line: number
 }

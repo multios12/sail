@@ -23,15 +23,13 @@ func routerInitial(static embed.FS) *gin.Engine {
 	router.GET("/static/:dir/:file", getStatic)
 
 	router.GET("/api/:year", getBalanceYear)
+	router.GET("/api/:year/:month", getBalanceMonth)
+	router.POST("/api/:year/:month", postBalanceMonth)
 
 	router.GET("/api/salary/:year", getSalaryYear)
 	router.GET("/api/salary/:year/:month", getSalaryMonth)
 	router.PUT("/api/salary/:year/:month", putSalaryMonth)
 	router.GET("/api/salary/:year/:month/images/:file", getSalaryDetailImage)
-
-	router.GET("/api/cost/:year", getCostYear)
-	router.GET("/api/cost/:year/:month", getCostYearMonth)
-	router.POST("/api/cost/:year/:month", postCostYearMonth)
 
 	router.POST("/api/files", postFiles)
 	return router
@@ -42,55 +40,13 @@ func getStatic(c *gin.Context) {
 	c.FileFromFS("static"+c.Request.URL.Path, http.FS(static))
 }
 
-// 総表示データ GET API
+// バランスシート年単位データ GET API
 func getBalanceYear(c *gin.Context) {
-	m := map[string]BalanceItem{}
-
-	for _, salary := range salaries {
-		if c.Param("year") != salary.Month[:4] {
-			continue
-		}
-
-		item, ok := m[salary.Month[:6]]
-		if !ok {
-			item = BalanceItem{Month: salary.Month[:6]}
-		}
-
-		item.Salary += salary.Totals[0].Value + salary.Expense
-		item.Paid += salary.Totals[2].Value + salary.Expense
-		if len(salary.Month) == 7 {
-			item.Memo = "＋賞与"
-		}
-		m[salary.Month[:6]] = item
-	}
-
-	costs, err := findCostByYear(c.Param("year"))
+	balances, err := findBalanceByYear(c.Param("year"))
 	if err != nil {
 		c.Status(http.StatusInternalServerError)
 		return
 	}
-
-	for _, c := range costs {
-		item, ok := m[c.Month]
-		if !ok {
-			item = BalanceItem{Month: c.Month}
-		}
-
-		item.Cost = c.Water + c.Electric + c.Gas + c.Mobile + c.Line
-		var nowMonth = strconv.Itoa(int(time.Now().Month()))
-		if len(nowMonth) == 1 {
-			nowMonth = "0" + nowMonth
-		}
-		nowMonth = strconv.Itoa(time.Now().Year()) + nowMonth
-		item.IsNotCost = c.Month < nowMonth && (c.Electric == 0 || c.Gas == 0 || c.Mobile == 0 || c.Line == 0)
-		m[c.Month] = item
-	}
-
-	balances := []BalanceItem{}
-	for _, v := range m {
-		balances = append(balances, v)
-	}
-	sort.Slice(balances, func(i, j int) bool { return balances[i].Month > balances[j].Month })
 
 	model := BalanceYear{Year: c.Param("year"), Balances: balances}
 	var now = time.Now().AddDate(0, 1, 0)
@@ -100,9 +56,61 @@ func getBalanceYear(c *gin.Context) {
 	c.JSON(http.StatusOK, model)
 }
 
-// 年単位データ GET API
+// バランスシート月単位データ GET API
+func getBalanceMonth(c *gin.Context) {
+	m := c.Param("year") + c.Param("month")
+
+	balance, err := findBalanceByMonth(m)
+	if err != nil {
+		c.Status(http.StatusInternalServerError)
+		return
+	}
+	c.JSON(http.StatusOK, balance)
+}
+
+// バランスシート月単位データ POST API
+func postBalanceMonth(c *gin.Context) {
+	value := c.Param("year") + c.Param("month")
+	var regmonth = regexp.MustCompile(`^[0-9]{6}$`)
+	if !regmonth.MatchString(value) {
+		c.Status(http.StatusNotFound)
+		return
+	}
+
+	var body Balance
+	if err := c.ShouldBindJSON(&body); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	target, err := findBalanceByMonth(value)
+	if err != nil {
+		c.Status(http.StatusInternalServerError)
+	}
+	target.CostWater = body.CostWater
+	target.CostElectric = body.CostElectric
+	target.CostGas = body.CostGas
+	target.CostMobile = body.CostMobile
+	target.CostLine = body.CostLine
+	target.CostTax = body.CostTax
+	target.Cost = body.CostWater + body.CostElectric + body.CostGas + body.CostMobile + body.CostLine + body.CostTax
+	target.Saving = body.Saving
+	target.Memo = body.Memo
+
+	var nowMonth = strconv.Itoa(int(time.Now().Month()))
+	if len(nowMonth) == 1 {
+		nowMonth = "0" + nowMonth
+	}
+	nowMonth = strconv.Itoa(time.Now().Year()) + nowMonth
+
+	target.IsNotCost = body.Month < nowMonth && (body.CostElectric == 0 || body.CostGas == 0 || body.CostMobile == 0 || body.CostLine == 0)
+	upsertBalance(target)
+	c.Status(http.StatusOK)
+}
+
+// 給与年単位データ GET API
 func getSalaryYear(c *gin.Context) {
-	y := SalaryYearModel{Year: c.Param("year")}
+	y := SalaryYear{Year: c.Param("year")}
 
 	for _, detail := range salaries {
 		isEnabled := false
@@ -147,14 +155,14 @@ func getSalaryMonth(c *gin.Context) {
 	m := c.Param("year") + c.Param("month")
 	for _, v := range salaries {
 		if v.Month == m {
-			c.JSON(200, v)
+			c.JSON(http.StatusOK, v)
 			return
 		}
 	}
-	c.Status(404)
+	c.Status(http.StatusNotFound)
 }
 
-// 月単位データ再作成 PUT API
+// 給与月単位データ再作成 PUT API
 func putSalaryMonth(c *gin.Context) {
 	m := c.Param("year") + c.Param("month")
 	filename := filepath.Join(dataPath, m)
@@ -174,7 +182,15 @@ func putSalaryMonth(c *gin.Context) {
 	if err != nil {
 		c.Status(http.StatusInternalServerError)
 	}
-	c.Status(http.StatusOK)
+	updateBalanceFromSalaries(m[:6], salaries)
+
+	for _, v := range salaries {
+		if v.Month == m {
+			c.JSON(http.StatusOK, v)
+			return
+		}
+	}
+	c.Status(http.StatusNotFound)
 }
 
 // 月単位画像 GET API
@@ -182,49 +198,6 @@ func getSalaryDetailImage(c *gin.Context) {
 	m := c.Param("year") + c.Param("month")
 	filename := filepath.Join(dataPath, m, c.Param("file"))
 	c.File(filename)
-}
-
-// 年単位固定支出データ GET API
-func getCostYear(c *gin.Context) {
-	if costs, err := findCostByYear(c.Param("year")); err != nil {
-		c.Status(http.StatusNotFound)
-	} else {
-		var costYear = SumCost{Year: c.Param(("year")), Costs: costs}
-		var now = time.Now().AddDate(0, 1, 0)
-		for i := now.Year(); i >= 2020; i-- {
-			costYear.EnableYears = append(costYear.EnableYears, strconv.Itoa(i))
-		}
-		c.JSON(http.StatusOK, costYear)
-	}
-}
-
-// 月単位固定支出データ GET API
-func getCostYearMonth(c *gin.Context) {
-	value := c.Param("year") + c.Param("month")
-	if cost, err := findCostByMonth(value); err != nil {
-		c.Status(http.StatusNotFound)
-	} else {
-		c.JSON(http.StatusOK, cost)
-	}
-}
-
-// 月単位固定支出データ POST API
-func postCostYearMonth(c *gin.Context) {
-	value := c.Param("year") + c.Param("month")
-	var regmonth = regexp.MustCompile(`^[0-9]{6}$`)
-	if !regmonth.MatchString(value) {
-		c.Status(http.StatusNotFound)
-		return
-	}
-
-	var cost Cost
-	if err := c.ShouldBindJSON(&cost); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
-
-	upsertCost(cost)
-	c.Status(http.StatusOK)
 }
 
 // ファイル保存 POST API

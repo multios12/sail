@@ -10,19 +10,19 @@ import (
 	"strings"
 )
 
-// 指定されたディレクトリからデータを読み込み、明細モデルリストを返す
-func readAllData(dataPath string) ([]SalaryMonthModel, error) {
+// 指定されたディレクトリからデータを読み込み、給与明細モデルリストを返す
+func readAllData(dataPath string) ([]Salary, error) {
 	files, err := ioutil.ReadDir(dataPath)
 	if err != nil {
 		log.Print(err)
 		return nil, err
 	}
 
-	details := []SalaryMonthModel{}
+	salaries := []Salary{}
 
 	for _, file := range files {
 		exist := false
-		for _, m := range details {
+		for _, m := range salaries {
 			if m.Month == file.Name() {
 				exist = true
 				break
@@ -35,14 +35,15 @@ func readAllData(dataPath string) ([]SalaryMonthModel, error) {
 
 		monthDir := filepath.Join(dataPath, file.Name())
 		d := readMonthDir(monthDir)
-		details = append(details, d)
+		salaries = append(salaries, d)
+		updateBalanceFromSalaries(d.Month[:6], salaries)
 	}
-	return details, nil
+	return salaries, nil
 }
 
 // 年月ディレクトリを読み込み、明細モデルを返す
-func readMonthDir(dirPath string) SalaryMonthModel {
-	s := SalaryMonthModel{}
+func readMonthDir(dirPath string) Salary {
+	s := Salary{}
 	s.Month = filepath.Base(dirPath)
 
 	s.Title = s.Month[:4] + "年" + s.Month[4:6] + "月"
@@ -243,4 +244,34 @@ func readTextFileToExpenseItem(filename string) (expense int, expenses []Expense
 		expenses = append(expenses, expenseItem)
 	}
 	return
+}
+
+func updateBalanceFromSalaries(month string, salaries []Salary) {
+	b, err := findBalanceByMonth(month)
+	b.Month = month
+	if err != nil {
+		b = Balance{Month: month}
+	}
+	salary := 0
+	paid := 0
+	expense := 0
+	for _, s := range salaries {
+		if s.Month[:6] != month {
+			continue
+		}
+		salary += s.Totals[0].Value + s.Expense
+		paid += s.Totals[2].Value + s.Expense
+		expense = s.Expense
+		if len(s.Month) == 7 {
+			b.Memo = strings.ReplaceAll(b.Memo, "＋賞与", "")
+			b.Memo = "＋賞与" + b.Memo
+		}
+	}
+
+	if b.Salary != salary || b.Paid != paid || b.Expense != expense {
+		b.Salary = salary
+		b.Paid = paid
+		b.Expense = expense
+		upsertBalance(b)
+	}
 }

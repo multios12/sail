@@ -9,7 +9,7 @@ import (
 )
 
 // 明細リスト
-var salaries []SalaryMonthModel
+var salaries []Salary
 
 // クロールモード
 var isConvertMode bool
@@ -50,14 +50,14 @@ func main() {
 		return
 	}
 
+	dbOpen()
+
 	var err error
 	salaries, err = readAllData(dataPath)
 	if err != nil {
 		println(err)
 		return
 	}
-
-	dbOpen()
 
 	router := routerInitial(static)
 	router.Run(*port)
