@@ -18,7 +18,7 @@ const MuUploadButton = () => {
     }
     const data = new FormData()
     data.append("file", file)
-    axios.post("api/files", data).then((r) => {
+    axios.post("api/files", data).then(() => {
       document.querySelector("#dialog")?.classList.remove('is-active');
       window.location.href = "./"
     }).catch(r => setMessage(r))

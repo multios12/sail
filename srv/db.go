@@ -56,6 +56,7 @@ func findBalanceByYear(year string) (costs []Balance, err error) {
 /** 年月をキーとしてバランスシートの検索 */
 func findBalanceByMonth(month string) (b Balance, err error) {
 	result := db.Find(&b, month)
+	b.Month = month
 	return b, result.Error
 
 }

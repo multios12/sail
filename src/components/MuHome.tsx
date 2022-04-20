@@ -2,12 +2,7 @@ import "./MuHome.css";
 import axios from "axios";
 import { MouseEvent, useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import { BalanceItem, BalanceYear } from "../models";
-
-/** 汎用Props */
-type Props<T> = {
-  Value: T
-}
+import { BalanceItem, BalanceYear, SalaryModel } from "../models";
 
 /** 月ごと表示Props */
 type MonthViewProps<T> = {
@@ -24,14 +19,13 @@ type YearCardProps = {
 
 /** 総合表示コンポーネント */
 const MuHome= () => {
+  const v:BalanceYear = { Year: new Date().getFullYear().toString(), Balances: [], EnableYears: [] }
   const { year } = useParams();
-  const [model, setModel] = useState({ Year: new Date().getFullYear().toString(), Balances: [], EnableYears: [] });
+  const [model, setModel] = useState(v);
 
   useEffect(() => {
     const url = `./api/${year ?? (new Date()).getFullYear()}`
-    axios.get(url).then(r => {
-      setModel(r.data)
-    })
+    axios.get<BalanceYear>(url).then(r => setModel(r.data))
   }, [year]);
   return (
     <div>
@@ -121,12 +115,12 @@ const MuMonthTr = (props: MonthViewProps<BalanceItem>) => {
     :
     <tr key={props.Value.Month}>
       <td>{props.Value.Month.substring(0, 4)}年{props.Value.Month.substring(4)}月</td>
-      <td>{props.Value.Salary.toLocaleString()}</td>
-      <td>{props.Value.Paid.toLocaleString()}</td>
-      <td className={props.Value.IsNotCost ? 'has-background-danger-light' : ''}>{props.Value.Cost.toLocaleString()}</td>
+      <td className="MuNumber has-text-right">{props.Value.Salary.toLocaleString()}</td>
+      <td className="MuNumber has-text-right">{props.Value.Paid.toLocaleString()}</td>
+      <td className={(props.Value.IsNotCost ? 'has-background-danger-light' : '') + ' has-text-right'}>{props.Value.Cost.toLocaleString()}</td>
       <td className="MuNumber px-0 has-text-right pr-4">{saving.toLocaleString()}</td>
       <td>{memo}</td>
-      <td><button id={"edit" + props.Value.Month} className="button is-info is-small is-inverted material-icons" onClick={() => { props.SetEditMonth(props.Value.Month) }}>edit</button></td>
+      <td><button id={`edit${props.Value.Month}`} className="button is-info is-small is-inverted material-icons" onClick={() => { props.SetEditMonth(props.Value.Month) }}>edit</button></td>
     </tr>
   )
 }

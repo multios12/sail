@@ -9,8 +9,8 @@ type Props<T> = {
 }
 
 /** 給与収入（月ごと）コンポーネント */
-const MuSalaryMonth =() => {
-  const item: SalaryMonthModel = {Month:"202010", Counts: [], Times: [], Salarys: [], Costs: [], Totals: [], Expense: 0, Expenses: [], Images: [] }
+const MuSalaryMonth = () => {
+  const item: SalaryMonthModel = { Month: "202010", Counts: [], Times: [], Salarys: [], Costs: [], Totals: [], Expense: 0, Expenses: [], Images: [] }
   const { year, month } = useParams();
   const [model, setModel] = useState(item);
 
@@ -20,17 +20,16 @@ const MuSalaryMonth =() => {
     t.classList.add("is-loading")
     document.querySelector(".card-content")?.classList.add("is-hidden")
     const url = `./api/salary/${year}/${month}`
-    axios.put(url).then(r => {
-        setModel(r.data)
-    }).finally(() => {
-      t.classList.remove("is-loading")
-      document.querySelector(".card-content")?.classList.remove("is-hidden")
-    })
+    axios.put(url).then(r => setModel(r.data))
+      .finally(() => {
+        t.classList.remove("is-loading")
+        document.querySelector(".card-content")?.classList.remove("is-hidden")
+      })
   }
 
   useEffect(() => {
     const url = `./api/salary/${year}/${month}`
-    axios.get(url).then(r => {
+    axios.get<SalaryMonthModel>(url).then(r => {
       setModel(r.data)
     })
   }, [year, month]);

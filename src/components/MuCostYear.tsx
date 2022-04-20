@@ -1,5 +1,5 @@
 import './MuCostYear.css';
-import axios from "axios";
+import axios, { AxiosResponse } from "axios";
 import React, { MouseEvent, useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { BalanceItem, BalanceYear } from "../models";
@@ -24,9 +24,7 @@ const MuSalaryYear = () => {
 
   useEffect(() => {
     const url = `./api/${year ?? (new Date()).getFullYear()}`
-    axios.get(url).then(r => {
-      setSumCost(r.data)
-    })
+    axios.get<BalanceYear>(url).then(r => setSumCost(r.data))
   }, [year]);
   return (
     <div>
@@ -98,13 +96,14 @@ const MuMonthViewTr = (props: MonthViewProps<BalanceItem>) => {
 
   const saveClick = (e: MouseEvent<HTMLButtonElement>) => {
     const url = `./api/${props.Value.Month.toString().substring(0, 4)}/${props.Value.Month.toString().substring(4)}`
-    axios.post(url, { Month: props.Value.Month, CostWater: Water, CostElectric: Electric, CostGas: Gas, CostMobile: Mobile, CostLine: Line, CostTax: Tax })
+    const d = { Month: props.Value.Month, CostWater: Water, CostElectric: Electric, CostGas: Gas, CostMobile: Mobile, CostLine: Line, CostTax: Tax }
+    axios.post(url, d)
     props.SetEditMonth("")
   }
   return (props.EditMonth === props.Value.Month ?
     <tr key={props.Value.Month}>
       <td>{`${props.Value.Month.substring(0, 4)}年${props.Value.Month.substring(4)}月`}</td>
-      <td className="MuNumber px-0 has-text-right">{Water + Electric + Gas + Mobile + Line}</td>
+      <td className="MuNumber px-0 has-text-right">{Water + Electric + Gas + Mobile + Line + Tax}</td>
       <td className="MuNumber p-0 has-text-right"><input type="number" className="input px-0 has-text-right" value={Water} onChange={e => setWater(Number(e.target.value))} /></td>
       <td className="MuNumber p-0 has-text-right"><input type="number" className="input px-0 has-text-right" value={Electric} onChange={e => setElectric(Number(e.target.value))} /></td>
       <td className="MuNumber p-0 has-text-right"><input type="number" className="input px-0 has-text-right" value={Gas} onChange={e => setGas(Number(e.target.value))} /></td>

@@ -1,5 +1,4 @@
 import { Route, HashRouter as Router, Routes } from 'react-router-dom';
-import './App.css';
 import AppBar from "./components/MuAppBar";
 import MuHome from './components/MuHome';
 import MuSalaryYear from './components/MuSalaryYear';

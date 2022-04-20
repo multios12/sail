@@ -1,4 +1,4 @@
-import axios from "axios";
+import axios, { AxiosResponse } from "axios";
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { DetailItem, SalaryMonthModel, SalaryModel } from "../models";
@@ -15,15 +15,14 @@ type YearCardProps = {
 }
 
 /** 給与収入（年集計）コンポーネント */
-const MuSalaryYear= () => {
+const MuSalaryYear = () => {
+  const s: SalaryModel = { Year: new Date().getFullYear().toString(), Details: [], Totals: [], EnableYears: [] }
   const { year } = useParams();
-  const [model, setModel] = useState({ Year: new Date().getFullYear().toString(), Details: [], Totals: [], EnableYears: [] });
+  const [model, setModel] = useState(s);
 
   useEffect(() => {
     const url = `./api/salary/${year ?? (new Date()).getFullYear()}`
-    axios.get(url).then(r => {
-      setModel(r.data)
-    })
+    axios.get<SalaryModel>(url).then(r => setModel(r.data))
   }, [year]);
   return (
     <div>
