@@ -42,5 +42,5 @@
     ]
   },
   "homepage": "./",
-  "proxy": "http://localhost:3001"
+  "proxy": "http://backend:3000"
 }

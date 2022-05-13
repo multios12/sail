@@ -1,14 +1,15 @@
 echo off
 
 rem build front page
+cd front
 call yarn build
-robocopy .\build .\srv\static /MIR
+robocopy .\build .\server\static /MIR
 rmdir /s /Q build
+cd ..
 
 rem build server app
 set GOOS=linux
 set GOARCH=amd64
-mkdir dist
-cd srv
-go build -ldflags="-s -w" -trimpath -o ../dist 
+cd server
+go build -ldflags="-s -w" -trimpath -o ../dist/
 cd ..

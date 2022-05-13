@@ -5,6 +5,7 @@
       "label": "react-start",
       "detail": "react-scripts start for debug",
       "type": "npm",
+      "path": "./front",
       "script": "start",
       "isBackground": true,
       "problemMatcher": [
