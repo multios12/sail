@@ -2,7 +2,7 @@ import "./MuHome.css";
 import axios from "axios";
 import { MouseEvent, useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import { BalanceItem, BalanceYear, SalaryModel } from "../models";
+import { BalanceItem, BalanceYear } from "../models";
 
 /** 月ごと表示Props */
 type MonthViewProps<T> = {

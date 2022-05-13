@@ -2,48 +2,39 @@ package main
 
 import (
 	"embed"
+	"errors"
 	"flag"
+	"fmt"
 	"os"
 	"path/filepath"
-	"strings"
 )
 
-// 明細リスト
-var salaries []Salary
-
-// クロールモード
-var isConvertMode bool
-
-// データディレクトリパス
-var dataPath string
-
-// PDFパスワード
-var password string
-
+var salaries []Salary  // 明細リスト
+var isConvertMode bool // クロールモード
+var dataPath string    // データディレクトリ
+var password string    // PDFパスワード
+var port string        // 起動ポート
 //go:embed static/*
 var static embed.FS
 
-func main() {
-	flag.BoolVar(&isConvertMode, "convert", false, "true is PDF convert mode")
-	flag.StringVar(&password, "password", "", "PDF password")
-	flag.StringVar(&dataPath, "datapath", "./data", "data directory")
-	port := flag.String("port", ":3000", "server port")
-	flag.VisitAll(func(f *flag.Flag) {
-		if s := os.Getenv(strings.ToUpper(f.Name)); s != "" {
-			f.Value.Set(s)
-		}
-	})
+func init() {
+	flag.Usage = func() {
+		fmt.Fprintf(flag.CommandLine.Output(), "給与明細からデータを抽出し一覧表示するWebサーバ\n\n")
+		fmt.Fprintf(flag.CommandLine.Output(), "sail [Source] [options...]\n\n")
+		fmt.Fprintf(flag.CommandLine.Output(), `Source  PDFなどのデータが格納されているディレクトリを指定します (default "./data")`+"\n")
+		fmt.Fprintf(flag.CommandLine.Output(), "Options\n")
+		flag.PrintDefaults()
+		os.Exit(0)
+	}
+	flag.BoolVar(&isConvertMode, "C", false, "給与明細PDFからのデータ抽出のみを行い、サーバは起動しません")
+	flag.StringVar(&password, "W", "", "PDF処理時に指定されたパスワードを使用してPDFを開きます")
+	flag.StringVar(&port, "P", ":3000", "Webサーバが使用するポートを指定します")
 	flag.Parse()
-
+	dataPath = flag.Arg(0)
 	dataPath, _ = filepath.Abs(dataPath)
-	if _, err := os.Stat(dataPath); err != nil {
-		os.Mkdir(dataPath, 0777)
-	}
+}
 
-	if password == "" {
-		println("[warning]パスワードが設定されていないため、明細の取り込みに失敗する可能性があります。")
-	}
-
+func main() {
 	// クロールモード
 	if isConvertMode {
 		convert()
@@ -60,5 +51,20 @@ func main() {
 	}
 
 	router := routerInitial(static)
-	router.Run(*port)
+	err = router.Run(port)
+}
+
+func validateArgs() error {
+	if i, err := os.Stat(dataPath); err != nil || !i.IsDir() {
+		err = os.Mkdir(dataPath, os.ModePerm)
+		if err != nil {
+			return errors.New(fmt.Sprintf("データディレクトリが作成できません。(%s)", err))
+		}
+	}
+
+	if password == "" {
+		println("[warning]パスワードが設定されていないため、明細の取り込みに失敗する可能性があります。")
+	}
+
+	return nil
 }

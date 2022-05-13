@@ -1,5 +1,5 @@
 import './MuCostYear.css';
-import axios, { AxiosResponse } from "axios";
+import axios from "axios";
 import React, { MouseEvent, useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { BalanceItem, BalanceYear } from "../models";
