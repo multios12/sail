@@ -28,9 +28,10 @@ func init() {
 	}
 	flag.BoolVar(&isConvertMode, "C", false, "給与明細PDFからのデータ抽出のみを行い、サーバは起動しません")
 	flag.StringVar(&password, "W", "", "PDF処理時に指定されたパスワードを使用してPDFを開きます")
-	flag.StringVar(&port, "P", ":3000", "Webサーバが使用するポートを指定します")
+	flag.StringVar(&port, "p", ":3000", "Webサーバが使用するポートを指定します")
+	flag.StringVar(&dataPath, "d", "./data", "")
 	flag.Parse()
-	dataPath = flag.Arg(0)
+
 	dataPath, _ = filepath.Abs(dataPath)
 }
 
@@ -51,7 +52,7 @@ func main() {
 	}
 
 	router := routerInitial(static)
-	err = router.Run(port)
+	router.Run(port)
 }
 
 func validateArgs() error {

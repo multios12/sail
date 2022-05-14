@@ -1,17 +1,16 @@
 # sail - 給与明細集計  
 
-## 必要なライブラリ
+
+## 開発環境
+必須ソフトウェア：VS Code, Docker
+VS Codeに[Remote - Containers]Extensionのインストールが必要
+
+ReOpen Containerで、fornt/serverのどちらかを選択することにより、
+開発環境の立ち上げが可能
+
+## 使用ライブラリ
 ### poppler-utils
   https://texwiki.texjp.org/?Poppler#k603e696
-
-### popplerのインストール方法(Ubuntu)
-下記のコマンドを実行
-> sudo apt install poppler-utils poppler-data
-
-### popplerのインストール方法(Windows)
-1. 下記から、Windows用バイナリをダウンロード、任意のフォルダで回答
-https://blog.alivate.com.au/poppler-windows/
-2. 環境変数pathに解凍したバイナリを置いたフォルダを指定
 
 ### popplerのPDF→テキスト 変換コマンド
 > pdftotext [pdfファイル] -opw [パスワード]
@@ -20,12 +19,10 @@ https://blog.alivate.com.au/poppler-windows/
 
 ### create new front react project
 > create-react-app sail --template typescript\
-> yarn add bulma
-> yarn add react-router-dom 
+> yarn add bulma react-router-dom 
 
 ### create new server golang project
 > mkdir srv
 > cd srv
 > go mod init github.com/multios12/sail
-> go get "github.com/glebarez/sqlite"
-> go get "gorm.io/gorm"
+> go get "github.com/glebarez/sqlite" "gorm.io/gorm"
