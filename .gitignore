@@ -3,6 +3,7 @@
 /front/build
 /front/node_modules
 /front/package-lock.json
+/server/__debug_bin
 /server/__debug_bin.exe
 /server/static/static
 /server/static/index.html

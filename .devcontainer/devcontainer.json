@@ -1,17 +1,23 @@
 {
-    "name": "Dev Container server",
-    "dockerComposeFile": "docker-compose.yml",
-    "service": "sail",
-    "workspaceFolder": "/workspace/",
-    "shutdownAction": "none",
+    "name": "Dev Container sail",
+    "build": {
+        "context": "../",
+        "dockerfile": "Dockerfile"
+    },
+    "settings": {
+        "editor.codeActionsOnSave": {
+            "source.fixAll.eslint": true // ファイル保存時にESLintでフォーマット
+        }
+    },
     "extensions": [
         "golang.go",
         "reliutg.bulma-css-class-completion",
         "dbaeumer.vscode-eslint"
     ],
-    "settings": {
-        "editor.codeActionsOnSave": {
-            "source.fixAll.eslint": true // ファイル保存時にESLintでフォーマット
-        }
-    }
+    "forwardPorts": [
+        3000
+    ],
+    "mounts": [
+        "source=${localWorkspaceFolder},target=/workspace,type=bind,consistency=cached"
+    ]
 }
