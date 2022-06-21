@@ -16,8 +16,8 @@ Vscode上でCTRL+SHIFT+P押下、[Reopen in Container]選択で開発環境の�
 ## プロジェクトの初期構築コマンド
 
 ### create new front react project
-> create-react-app sail --template typescript\
-> yarn add bulma react-router-dom 
+> npm create vite@latest 
+> yarn add bulma
 
 ### create new server golang project
 > mkdir srv

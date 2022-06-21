@@ -26,8 +26,8 @@ func init() {
 		flag.PrintDefaults()
 		os.Exit(0)
 	}
-	flag.BoolVar(&isConvertMode, "C", false, "給与明細PDFからのデータ抽出のみを行い、サーバは起動しません")
-	flag.StringVar(&password, "W", "", "PDF処理時に指定されたパスワードを使用してPDFを開きます")
+	flag.BoolVar(&isConvertMode, "c", false, "給与明細PDFからのデータ抽出のみを行い、サーバは起動しません")
+	flag.StringVar(&password, "w", "", "PDF処理時に指定されたパスワードを使用してPDFを開きます")
 	flag.StringVar(&port, "p", ":3000", "Webサーバが使用するポートを指定します")
 	flag.StringVar(&dataPath, "d", "./data", "")
 	flag.Parse()
@@ -38,7 +38,10 @@ func init() {
 func main() {
 	// クロールモード
 	if isConvertMode {
-		convert()
+		err := convert()
+		if err != nil {
+			fmt.Println(err)
+		}
 		return
 	}
 

@@ -12,7 +12,8 @@
     "extensions": [
         "golang.go",
         "reliutg.bulma-css-class-completion",
-        "dbaeumer.vscode-eslint"
+        "dbaeumer.vscode-eslint",
+        "svelte.svelte-vscode"
     ],
     "forwardPorts": [
         3000

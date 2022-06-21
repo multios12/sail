@@ -203,7 +203,7 @@ func readTextFileToExpenseItem(filename string) (expense int, expenses []Expense
 		return
 	}
 
-	r := regexp.MustCompile("^[\\-,0-9 円]+$")
+	regAmount := regexp.MustCompile("^[\\-,0-9 円]+$")
 
 	text := string(bytes)
 	lines := strings.Split(text, "\n")
@@ -213,7 +213,7 @@ func readTextFileToExpenseItem(filename string) (expense int, expenses []Expense
 		v = strings.ReplaceAll(v, "▲", "-")
 		if len(v) == 0 {
 			continue
-		} else if r.MatchString(v) {
+		} else if regAmount.MatchString(v) {
 			v = strings.ReplaceAll(v, ",", "")
 			v = strings.ReplaceAll(v, " 円", "")
 		}
@@ -221,13 +221,13 @@ func readTextFileToExpenseItem(filename string) (expense int, expenses []Expense
 		targets = append(targets, v)
 	}
 
-	r = regexp.MustCompile("^[1-9]$")
+	regAmount = regexp.MustCompile("^[1-9]$")
 	r2 := regexp.MustCompile("^[0-9]+$")
 	expenseItem := ExpenseItem{}
 	for i, v := range targets {
 		if i == 0 {
 			expense, _ = strconv.Atoi(v)
-		} else if r.MatchString(v) {
+		} else if regAmount.MatchString(v) {
 			if len(expenseItem.Name) > 0 {
 				expenses = append(expenses, expenseItem)
 			}
@@ -256,7 +256,7 @@ func updateBalanceFromSalaries(month string, salaries []Salary) {
 	paid := 0
 	expense := 0
 	for _, s := range salaries {
-		if s.Month[:6] != month {
+		if s.Month[:6] != month || len(s.Totals) < 3 {
 			continue
 		}
 		salary += s.Totals[0].Value + s.Expense

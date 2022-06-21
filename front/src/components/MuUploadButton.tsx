@@ -1,4 +1,3 @@
-import axios from 'axios';
 import 'bulma/css/bulma.css';
 import { useState } from 'react';
 
@@ -8,7 +7,7 @@ const MuUploadButton = () => {
   const [message, setMessage] = useState('')
 
   /** ファイル選択イベント */
-  const fileChange = () => {
+  const fileChange = async () => {
     const e = document.querySelector("#fileInput") as HTMLInputElement
     const file = e.files?.item(0)
     document.querySelector("#progress")?.classList.remove("is-hidden")
@@ -18,10 +17,21 @@ const MuUploadButton = () => {
     }
     const data = new FormData()
     data.append("file", file)
-    axios.post("api/files", data).then(() => {
-      document.querySelector("#dialog")?.classList.remove('is-active');
-      window.location.href = "./"
-    }).catch(r => setMessage(r))
+    const r = fetch("api/files", { method: "post", body: data })
+      .then((r) => {
+        console.log(r.status)
+        if (r.status === 200) {
+          document.querySelector("#dialog")?.classList.remove('is-active');
+          window.location.href = "./"
+        } else {
+          r.text().then((text) => {
+            setMessage(text)
+          });
+        }
+      }).catch(r => {
+        console.log(r)
+        setMessage("ファイルを保存できませんでした")
+      })
       .finally(() => document.querySelector("#progress")?.classList.add("is-hidden"))
   }
 
@@ -44,7 +54,7 @@ const MuUploadButton = () => {
             <button className="delete" aria-label="close" onClick={toggleClick}></button>
           </header>
           <section className="modal-card-body">
-            {message ?? <div className="notification is-danger">{message}</div>}
+            {message != "" ? <div className="notification is-danger">{message}</div> : ""}
             <div className="file has-name is-boxed is-fullwidth">
               <label className="file-label">
                 <input id="fileInput" className="file-input" type="file" name="resume" onChange={fileChange} />

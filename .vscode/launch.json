@@ -5,13 +5,18 @@
     "version": "0.2.0",
     "configurations": [
         {
+            "command": "npm start",
+            "name": "Run npm start",
+            "request": "launch",
+            "cwd": "${workspaceFolder}/front",
+            "type": "node-terminal"
+        },
+        {
             "name": "debug react",
-            "type": "pwa-chrome",
+            "type": "pwa-msedge",
             "request": "launch",
             "url": "http://localhost:3000",
             "webRoot": "${workspaceFolder}",
-            "preLaunchTask": "react-start",
-            "postDebugTask": "terminate-react-start",
         },
         {
             "name": "go API Server",
@@ -23,7 +28,9 @@
                 "-d",
                 "../data",
                 "-p",
-                ":3001"
+                ":3001",
+                "-w",
+                "H0812109",
             ],
         }
     ]

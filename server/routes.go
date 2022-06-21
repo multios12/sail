@@ -217,11 +217,16 @@ func postFiles(c *gin.Context) {
 
 	_, err = io.Copy(outFile, inFile)
 	if err != nil {
-		c.Status(http.StatusInternalServerError)
+		c.String(http.StatusInternalServerError, "ファイルを保存できません")
 		return
 	}
 
-	convert()
+	f, _ := os.Stat(filename)
+	err = createData(f)
+	if err != nil {
+		c.String(http.StatusInternalServerError, err.Error())
+		return
+	}
 	salaries, err = readAllData(dataPath)
 	if err != nil {
 		c.Status(http.StatusInternalServerError)

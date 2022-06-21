@@ -5,7 +5,6 @@ import { defineConfig } from "vite"
 export default defineConfig({
     plugins: [react(), viteSingleFile()],
     build: {
-        outDir: "build", // CRAに合わせて指定
         target: "esnext",
         assetsInlineLimit: 100000000,
         chunkSizeWarningLimit: 100000000,
@@ -15,5 +14,9 @@ export default defineConfig({
             inlineDynamicImports: true,
         },
     },
-    server: { port: 3000 },
+    server: {
+        watch: { usePolling: true },
+        port: 3000,
+        proxy: { "^/api/.*": "http://localhost:3001" },
+    },
 })
