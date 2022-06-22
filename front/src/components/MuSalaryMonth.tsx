@@ -1,7 +1,6 @@
-import axios from "axios";
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import { DetailItem, SalaryMonthModel } from "../models";
+import { SalaryMonthModel } from "../models";
 
 /** 汎用Props */
 type Props<T> = {
@@ -20,7 +19,7 @@ const MuSalaryMonth = () => {
     t.classList.add("is-loading")
     document.querySelector(".card-content")?.classList.add("is-hidden")
     const url = `./api/salary/${year}/${month}`
-    axios.put(url).then(r => setModel(r.data))
+    fetch(url, { method: "post" }).then(r => r.json()).then(r => setModel(r))
       .finally(() => {
         t.classList.remove("is-loading")
         document.querySelector(".card-content")?.classList.remove("is-hidden")
@@ -29,9 +28,7 @@ const MuSalaryMonth = () => {
 
   useEffect(() => {
     const url = `./api/salary/${year}/${month}`
-    axios.get<SalaryMonthModel>(url).then(r => {
-      setModel(r.data)
-    })
+    fetch(url).then(r => r.json()).then(r => setModel(r))
   }, [year, month]);
 
   return (
@@ -51,7 +48,14 @@ const MuSalaryMonth = () => {
               </td>
               <td>
                 <div className="columns">
-                  {model.Salarys?.map(i => <MuDetailTile key={i.Name} item={i} />)}
+                  {model.Salarys?.map(item => {
+                    return <div className="column">
+                      <article className="tile is-child box">
+                        <p >{item.Name}</p>
+                        <p >{item.Value.toLocaleString()}</p>
+                      </article>
+                    </div>
+                  })}
                 </div>
               </td>
             </tr>
@@ -62,7 +66,14 @@ const MuSalaryMonth = () => {
               </td>
               <td>
                 <div className="columns">
-                  {model.Costs?.map(i => <MuDetailTile key={i.Name} item={i} />)}
+                  {model.Costs?.map(item => {
+                    return <div className="column">
+                      <article className="tile is-child box">
+                        <p >{item.Name}</p>
+                        <p >{item.Value.toLocaleString()}</p>
+                      </article>
+                    </div>
+                  })}
                 </div>
               </td>
             </tr>
@@ -81,17 +92,6 @@ const MuSalaryMonth = () => {
       </div>
     </div>
   )
-}
-
-/** 詳細表示タイルコンポーネント */
-const MuDetailTile = ({ item }: Props<DetailItem>) => {
-  return (
-    <div className="column">
-      <article className="tile is-child box">
-        <p >{item.Name}</p>
-        <p >{item.Value.toLocaleString()}</p>
-      </article>
-    </div>)
 }
 
 export default MuSalaryMonth

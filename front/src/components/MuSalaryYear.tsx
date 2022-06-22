@@ -1,4 +1,3 @@
-import axios from "axios";
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { DetailItem, SalaryMonthModel, SalaryModel } from "../models";
@@ -22,7 +21,7 @@ const MuSalaryYear = () => {
 
   useEffect(() => {
     const url = `./api/salary/${year ?? (new Date()).getFullYear()}`
-    axios.get<SalaryModel>(url).then(r => setModel(r.data))
+    fetch(url).then(r => r.json()).then(r => setModel(r))
   }, [year]);
   return (
     <div>
