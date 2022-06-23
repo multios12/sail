@@ -20,7 +20,7 @@ func routerInitial(static embed.FS) *gin.Engine {
 
 	router.GET("/", getStatic)
 	router.GET("/favicon.ico", getStatic)
-	router.GET("/static/:dir/:file", getStatic)
+	router.GET("/assets/:file", getStatic)
 
 	router.GET("/api/:year", getBalanceYear)
 	router.GET("/api/:year/:month", getBalanceMonth)
