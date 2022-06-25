@@ -1,10 +1,10 @@
-package main
+package balance
 
 import (
-	"embed"
 	"io"
 	"net/http"
 	"os"
+	"path"
 	"path/filepath"
 	"regexp"
 	"sort"
@@ -14,30 +14,31 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// gin.Engineインスタンスにルーティングを設定して返す
-func routerInitial(static embed.FS) *gin.Engine {
-	router := gin.Default()
+var salaryPath string  // データディレクトリ
+var pdfPassword string // PDFパスワード
 
-	router.GET("/", getStatic)
-	router.GET("/favicon.ico", getStatic)
-	router.GET("/assets/:file", getStatic)
+func Initial(router *gin.Engine, dataPath string, password string) {
+	salaryPath = path.Join(dataPath, "salary")
+	pdfPassword = password
+	dbOpen(dataPath)
 
-	router.GET("/api/:year", getBalanceYear)
-	router.GET("/api/:year/:month", getBalanceMonth)
-	router.POST("/api/:year/:month", postBalanceMonth)
+	var err error
+	Salaries, err = readAllData()
+	if err != nil {
+		println(err)
+		return
+	}
+
+	router.GET("/api/balance/:year", getBalanceYear)
+	router.GET("/api/balance/:year/:month", getBalanceMonth)
+	router.POST("/api/balance/:year/:month", postBalanceMonth)
 
 	router.GET("/api/salary/:year", getSalaryYear)
 	router.GET("/api/salary/:year/:month", getSalaryMonth)
 	router.PUT("/api/salary/:year/:month", putSalaryMonth)
 	router.GET("/api/salary/:year/:month/images/:file", getSalaryDetailImage)
 
-	router.POST("/api/files", postFiles)
-	return router
-}
-
-// スタティックリソース GET API
-func getStatic(c *gin.Context) {
-	c.FileFromFS("static"+c.Request.URL.Path, http.FS(static))
+	router.POST("/api/salary/files", postFiles)
 }
 
 // バランスシート年単位データ GET API
@@ -112,7 +113,7 @@ func postBalanceMonth(c *gin.Context) {
 func getSalaryYear(c *gin.Context) {
 	y := SalaryYear{Year: c.Param("year")}
 
-	for _, detail := range salaries {
+	for _, detail := range Salaries {
 		isEnabled := false
 		for _, e := range y.EnableYears {
 			if e == detail.Month[:4] {
@@ -124,7 +125,7 @@ func getSalaryYear(c *gin.Context) {
 		}
 	}
 
-	for _, detail := range salaries {
+	for _, detail := range Salaries {
 		if detail.Month[:4] != y.Year {
 			continue
 		}
@@ -153,7 +154,7 @@ func getSalaryYear(c *gin.Context) {
 // 月単位データ GET API
 func getSalaryMonth(c *gin.Context) {
 	m := c.Param("year") + c.Param("month")
-	for _, v := range salaries {
+	for _, v := range Salaries {
 		if v.Month == m {
 			c.JSON(http.StatusOK, v)
 			return
@@ -165,7 +166,7 @@ func getSalaryMonth(c *gin.Context) {
 // 給与月単位データ再作成 PUT API
 func putSalaryMonth(c *gin.Context) {
 	m := c.Param("year") + c.Param("month")
-	filename := filepath.Join(dataPath, m)
+	filename := filepath.Join(salaryPath, m)
 
 	if _, err := os.Stat(filename); err == nil {
 		err := os.RemoveAll(filename)
@@ -176,15 +177,15 @@ func putSalaryMonth(c *gin.Context) {
 	}
 
 	// PDFファイルの変換とデータ再読み込み
-	convert()
+	Convert(salaryPath)
 	var err error
-	salaries, err = readAllData(dataPath)
+	Salaries, err = readAllData()
 	if err != nil {
 		c.Status(http.StatusInternalServerError)
 	}
-	updateBalanceFromSalaries(m[:6], salaries)
+	updateBalanceFromSalaries(m[:6], Salaries)
 
-	for _, v := range salaries {
+	for _, v := range Salaries {
 		if v.Month == m {
 			c.JSON(http.StatusOK, v)
 			return
@@ -196,7 +197,7 @@ func putSalaryMonth(c *gin.Context) {
 // 月単位画像 GET API
 func getSalaryDetailImage(c *gin.Context) {
 	m := c.Param("year") + c.Param("month")
-	filename := filepath.Join(dataPath, m, c.Param("file"))
+	filename := filepath.Join(salaryPath, m, c.Param("file"))
 	c.File(filename)
 }
 
@@ -207,7 +208,7 @@ func postFiles(c *gin.Context) {
 		return
 	}
 
-	filename := filepath.Join(dataPath, header.Filename)
+	filename := filepath.Join(salaryPath, header.Filename)
 	outFile, err := os.Create(filename)
 	if err != nil {
 		c.Status(http.StatusInternalServerError)
@@ -222,12 +223,12 @@ func postFiles(c *gin.Context) {
 	}
 
 	f, _ := os.Stat(filename)
-	err = createData(f)
+	err = createData(salaryPath, f)
 	if err != nil {
 		c.String(http.StatusInternalServerError, err.Error())
 		return
 	}
-	salaries, err = readAllData(dataPath)
+	Salaries, err = readAllData()
 	if err != nil {
 		c.Status(http.StatusInternalServerError)
 		return

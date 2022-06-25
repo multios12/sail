@@ -1,4 +1,4 @@
-package main
+package balance
 
 import (
 	"path/filepath"
@@ -15,7 +15,7 @@ import (
 var db *gorm.DB
 
 // データベースオープン
-func dbOpen() (err error) {
+func dbOpen(dataPath string) (err error) {
 	filename := filepath.Join(dataPath, "db")
 	db, err = gorm.Open(sqlite.Open(filename), &gorm.Config{})
 	db.AutoMigrate(&Balance{})

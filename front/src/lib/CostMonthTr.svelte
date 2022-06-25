@@ -22,7 +22,7 @@
   });
 
   const saveClick = () => {
-    const url = `./api/${Value.Month.toString().substring(
+    const url = `./api/balance/${Value.Month.toString().substring(
       0,
       4
     )}/${Value.Month.toString().substring(4)}`;

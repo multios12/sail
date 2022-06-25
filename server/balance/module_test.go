@@ -1,11 +1,12 @@
-package main
+package balance
 
 import (
 	"testing"
 )
 
 func TestReadAllData(t *testing.T) {
-	v, _ := readAllData("../../data/")
+	salaryPath = "../../data/"
+	v, _ := readAllData()
 	if len(v) == 0 {
 		t.Fail()
 	}

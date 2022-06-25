@@ -5,15 +5,17 @@ import (
 	"errors"
 	"flag"
 	"fmt"
+	"net/http"
 	"os"
 	"path/filepath"
+
+	"github.com/gin-gonic/gin"
+	"github.com/multios12/sail/balance"
 )
 
-var salaries []Salary  // 明細リスト
-var isConvertMode bool // クロールモード
-var dataPath string    // データディレクトリ
-var password string    // PDFパスワード
-var port string        // 起動ポート
+var dataPath string // データディレクトリ
+var password string // PDFパスワード
+var port string     // 起動ポート
 //go:embed static/*
 var static embed.FS
 
@@ -26,7 +28,6 @@ func init() {
 		flag.PrintDefaults()
 		os.Exit(0)
 	}
-	flag.BoolVar(&isConvertMode, "c", false, "給与明細PDFからのデータ抽出のみを行い、サーバは起動しません")
 	flag.StringVar(&password, "w", "", "PDF処理時に指定されたパスワードを使用してPDFを開きます")
 	flag.StringVar(&port, "p", ":3000", "Webサーバが使用するポートを指定します")
 	flag.StringVar(&dataPath, "d", "./data", "")
@@ -36,33 +37,26 @@ func init() {
 }
 
 func main() {
-	// クロールモード
-	if isConvertMode {
-		err := convert()
-		if err != nil {
-			fmt.Println(err)
-		}
-		return
-	}
+	router := gin.Default()
+	router.GET("/", getStatic)
+	router.GET("/favicon.ico", getStatic)
+	router.GET("/assets/:file", getStatic)
+	balance.Initial(router, dataPath, password)
 
-	dbOpen()
-
-	var err error
-	salaries, err = readAllData(dataPath)
-	if err != nil {
-		println(err)
-		return
-	}
-
-	router := routerInitial(static)
 	router.Run(port)
+}
+
+// スタティックリソース GET API
+func getStatic(c *gin.Context) {
+	c.FileFromFS("static"+c.Request.URL.Path, http.FS(static))
 }
 
 func validateArgs() error {
 	if i, err := os.Stat(dataPath); err != nil || !i.IsDir() {
 		err = os.Mkdir(dataPath, os.ModePerm)
 		if err != nil {
-			return errors.New(fmt.Sprintf("データディレクトリが作成できません。(%s)", err))
+			message := fmt.Sprintf("データディレクトリが作成できません。(%s)", err)
+			return errors.New(message)
 		}
 	}
 

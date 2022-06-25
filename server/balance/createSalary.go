@@ -1,4 +1,4 @@
-package main
+package balance
 
 import (
 	"io/fs"
@@ -11,7 +11,7 @@ import (
 )
 
 // 給与支給明細書データの作成
-func createSalaryData(file fs.FileInfo, src string, pages string) error {
+func createSalaryData(dataPath string, file fs.FileInfo, src string, pages string) error {
 
 	r := regexp.MustCompile(`(\d+)年(\d+)月(給与|.*賞与)_.+`)
 	month := r.ReplaceAllString(file.Name(), "$1$2")
@@ -25,7 +25,7 @@ func createSalaryData(file fs.FileInfo, src string, pages string) error {
 		month += "S"
 	}
 
-	monthPath := filepath.Join(dataPath, month)
+	monthPath := filepath.Join(salaryPath, month)
 	if _, err := os.Stat(monthPath); !os.IsNotExist(err) {
 		return err
 	}
@@ -33,7 +33,7 @@ func createSalaryData(file fs.FileInfo, src string, pages string) error {
 
 	// 画像
 	dist := filepath.Join(monthPath, "salary")
-	exec.Command("pdftocairo", src, dist, "-opw", password, "-png").Output()
+	exec.Command("pdftocairo", src, dist, "-opw", pdfPassword, "-png").Output()
 
 	if n >= 202005 && strings.Contains(s, "賞与") {
 		readSalaryFrom202005S(src, monthPath)

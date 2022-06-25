@@ -13,7 +13,7 @@
     }
     const data = new FormData();
     data.append("file", file);
-    const r = fetch("./api/files", { method: "post", body: data })
+    const r = fetch("./api/salary/files", { method: "post", body: data })
       .then((r) => {
         if (r.status === 200) {
           document.querySelector("#dialog")?.classList.remove("is-active");

@@ -1,4 +1,4 @@
-package main
+package balance
 
 import (
 	"errors"
@@ -13,20 +13,21 @@ import (
 )
 
 // コンテキスト
-func convert() error {
-	files, err := ioutil.ReadDir(dataPath)
+func Convert(dataPath string) error {
+	pdfPath := path.Join(dataPath, "_pdf")
+	files, err := ioutil.ReadDir(pdfPath)
 	if err != nil {
 		return err
 	}
 
 	for _, file := range files {
-		createData(file)
+		createData(dataPath, file)
 	}
 
 	return nil
 }
 
-func createData(file fs.FileInfo) error {
+func createData(dataPath string, file fs.FileInfo) error {
 	ext := path.Ext(file.Name())
 	if file.IsDir() || ext != ".pdf" {
 		return errors.New("給与明細・経費明細のPDFファイルを選択して下さい")
@@ -34,7 +35,7 @@ func createData(file fs.FileInfo) error {
 
 	regexp := regexp.MustCompile(`(\d+)年(\d+)月(給与|.*賞与|経費)_.+`)
 	if regexp.MatchString(file.Name()) {
-		src := filepath.Join(dataPath, file.Name())
+		src := filepath.Join(dataPath, "_pdf", file.Name())
 		println(src)
 		pages, err := pdfinfo(src)
 		if err != nil {
@@ -43,9 +44,9 @@ func createData(file fs.FileInfo) error {
 
 		s := regexp.ReplaceAllString(file.Name(), "$3")
 		if !strings.Contains(s, "経費") {
-			return createSalaryData(file, src, pages)
+			return createSalaryData(dataPath, file, src, pages)
 		} else {
-			return createExpenseData(file, src, pages)
+			return createExpenseData(dataPath, file, src, pages)
 		}
 	}
 	return errors.New("給与明細・経費明細のPDFファイルを選択して下さい")
@@ -55,7 +56,7 @@ func createData(file fs.FileInfo) error {
 
 // pdftotextコマンドを実行し、テキストデータを出力する
 func pdftotext(src string, dist string, opt string) {
-	opt = src + " " + dist + " -opw " + password + " " + opt
+	opt = src + " " + dist + " -opw " + pdfPassword + " " + opt
 	args := strings.Split(opt, " ")
 
 	text := ""
@@ -74,7 +75,7 @@ func pdftotext(src string, dist string, opt string) {
 func pdfinfo(filename string) (string, error) {
 	command := "pdfinfo"
 
-	b, err := exec.Command(command, filename, "-opw", password).Output()
+	b, err := exec.Command(command, filename, "-opw", pdfPassword).Output()
 	if err != nil {
 		return "1", err
 	}

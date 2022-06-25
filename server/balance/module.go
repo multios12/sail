@@ -1,4 +1,4 @@
-package main
+package balance
 
 import (
 	"io/ioutil"
@@ -10,9 +10,11 @@ import (
 	"strings"
 )
 
+var Salaries []Salary // 明細リスト
+
 // 指定されたディレクトリからデータを読み込み、給与明細モデルリストを返す
-func readAllData(dataPath string) ([]Salary, error) {
-	files, err := ioutil.ReadDir(dataPath)
+func readAllData() ([]Salary, error) {
+	files, err := ioutil.ReadDir(salaryPath)
 	if err != nil {
 		log.Print(err)
 		return nil, err
@@ -33,7 +35,7 @@ func readAllData(dataPath string) ([]Salary, error) {
 			continue
 		}
 
-		monthDir := filepath.Join(dataPath, file.Name())
+		monthDir := filepath.Join(salaryPath, file.Name())
 		d := readMonthDir(monthDir)
 		salaries = append(salaries, d)
 		updateBalanceFromSalaries(d.Month[:6], salaries)
