@@ -1,20 +1,21 @@
 package balance
 
 import (
-	"io/fs"
 	"os"
 	"os/exec"
+	"path"
 	"path/filepath"
 	"regexp"
 )
 
 // ----------------------------------------------------------------------------
 // 経費等支給明細書データ作成
-func createExpenseData(dataPath string, file fs.FileInfo, src string, pages string) error {
+func createExpenseData(dataPath string, filename string, src string, pages string) error {
 
 	r := regexp.MustCompile(`(\d+)年(\d+)月(経費)_.+`)
 
-	month := r.ReplaceAllString(file.Name(), "$1$2")
+	month := path.Base(filename)
+	month = r.ReplaceAllString(month, "$1$2")
 	if len(month) == 5 {
 		month = month[:4] + "0" + month[4:]
 	}

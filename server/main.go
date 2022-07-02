@@ -11,6 +11,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/multios12/sail/balance"
+	"github.com/multios12/sail/memo"
 )
 
 var dataPath string // データディレクトリ
@@ -38,10 +39,11 @@ func init() {
 
 func main() {
 	router := gin.Default()
-	router.GET("/", getStatic)
+	router.GET("/sail.html", getStatic)
+	router.GET("/memo.html", getStatic)
 	router.GET("/favicon.ico", getStatic)
-	router.GET("/assets/:file", getStatic)
 	balance.Initial(router, dataPath, password)
+	memo.Initial(router, dataPath)
 
 	router.Run(port)
 }

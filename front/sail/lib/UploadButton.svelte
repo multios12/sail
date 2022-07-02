@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { push } from "svelte-spa-router";
   /** メッセージ */
   let message = "";
 
@@ -17,7 +18,7 @@
       .then((r) => {
         if (r.status === 200) {
           document.querySelector("#dialog")?.classList.remove("is-active");
-          window.location.href = "./";
+          push("./");
         } else {
           r.text().then((text) => {
             message = text;

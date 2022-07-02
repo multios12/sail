@@ -2,12 +2,12 @@ package balance
 
 import (
 	"errors"
+	"fmt"
 	"io/fs"
 	"io/ioutil"
 	"os"
 	"os/exec"
 	"path"
-	"path/filepath"
 	"regexp"
 	"strings"
 )
@@ -21,32 +21,32 @@ func Convert(dataPath string) error {
 	}
 
 	for _, file := range files {
-		createData(dataPath, file)
+		filename := path.Join(pdfPath, file.Name())
+		createData(dataPath, filename)
 	}
 
 	return nil
 }
 
-func createData(dataPath string, file fs.FileInfo) error {
-	ext := path.Ext(file.Name())
-	if file.IsDir() || ext != ".pdf" {
+func createData(dataPath string, filename string) error {
+	ext := path.Ext(filename)
+	if ext != ".pdf" {
 		return errors.New("給与明細・経費明細のPDFファイルを選択して下さい")
 	}
 
 	regexp := regexp.MustCompile(`(\d+)年(\d+)月(給与|.*賞与|経費)_.+`)
-	if regexp.MatchString(file.Name()) {
-		src := filepath.Join(dataPath, "_pdf", file.Name())
-		println(src)
-		pages, err := pdfinfo(src)
+	if regexp.MatchString(filename) {
+		println(filename)
+		pages, err := pdfinfo(filename)
 		if err != nil {
-			return errors.New("給与明細PDFファイルが読み込めません。パスワードを確認してください。")
+			return fmt.Errorf("給与明細PDFファイルが読み込めません。パスワードを確認してください。: %w", err)
 		}
 
-		s := regexp.ReplaceAllString(file.Name(), "$3")
+		s := regexp.ReplaceAllString(filename, "$3")
 		if !strings.Contains(s, "経費") {
-			return createSalaryData(dataPath, file, src, pages)
+			return createSalaryData(dataPath, filename, filename, pages)
 		} else {
-			return createExpenseData(dataPath, file, src, pages)
+			return createExpenseData(dataPath, filename, filename, pages)
 		}
 	}
 	return errors.New("給与明細・経費明細のPDFファイルを選択して下さい")

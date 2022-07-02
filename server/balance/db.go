@@ -19,7 +19,7 @@ func dbOpen(dataPath string) (err error) {
 	filename := filepath.Join(dataPath, "db")
 	db, err = gorm.Open(sqlite.Open(filename), &gorm.Config{})
 	db.AutoMigrate(&Balance{})
-	return
+	return err
 }
 
 /** 年をキーとしてバランスシートの検索、テーブルに存在しない月は空データを返す */

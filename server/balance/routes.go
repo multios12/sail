@@ -1,6 +1,7 @@
 package balance
 
 import (
+	"fmt"
 	"io"
 	"net/http"
 	"os"
@@ -208,29 +209,29 @@ func postFiles(c *gin.Context) {
 		return
 	}
 
-	filename := filepath.Join(salaryPath, header.Filename)
+	filename := filepath.Join(salaryPath, "_pdf", header.Filename)
 	outFile, err := os.Create(filename)
 	if err != nil {
-		c.Status(http.StatusInternalServerError)
+		c.String(http.StatusInternalServerError, err.Error())
 		return
 	}
-	defer outFile.Close()
 
 	_, err = io.Copy(outFile, inFile)
 	if err != nil {
-		c.String(http.StatusInternalServerError, "ファイルを保存できません")
+		err = fmt.Errorf("ファイルが保存できません: %w", err)
+		c.String(http.StatusInternalServerError, err.Error())
 		return
 	}
+	outFile.Close()
 
-	f, _ := os.Stat(filename)
-	err = createData(salaryPath, f)
+	err = createData(salaryPath, filename)
 	if err != nil {
 		c.String(http.StatusInternalServerError, err.Error())
 		return
 	}
 	Salaries, err = readAllData()
 	if err != nil {
-		c.Status(http.StatusInternalServerError)
+		c.String(http.StatusInternalServerError, err.Error())
 		return
 	}
 	c.Status(http.StatusOK)
