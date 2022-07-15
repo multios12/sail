@@ -1,5 +1,4 @@
 <script lang="ts">
-  import "bulma/css/bulma.css";
   import AppBar from "./lib/AppBar.svelte";
   import Router from "svelte-spa-router";
   import Home from "./routes/Home.svelte";
@@ -20,3 +19,7 @@
 <main>
   <Router {routes} />
 </main>
+
+<style>
+  @import url("bulma/css/bulma.css");
+</style>

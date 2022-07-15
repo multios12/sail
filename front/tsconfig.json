@@ -18,9 +18,13 @@
   },
   "include": [
     "*/**/*.d.ts",
+    "*.ts",
     "*/**/*.ts",
     "*/**/*.js",
     "*/**/*.svelte"
+  ],
+  "exclude": [
+    "*/dist/*.*",
   ],
   "references": [
     {

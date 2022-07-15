@@ -1,6 +1,5 @@
 <script lang="ts">
   import { onMount } from "svelte";
-  import "bulma/css/bulma.css";
   type lineType = { Day: string; Memo: string };
   type listType = { WritedMonths: string[]; Lines: lineType[] };
   let date: Date | null = new Date();
@@ -113,3 +112,7 @@
     </div>
   </div>
 </main>
+
+<style>
+  @import url("bulma/css/bulma.css");
+</style>

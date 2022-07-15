@@ -1,8 +1,13 @@
 #!/bin/sh
 
-cd front
-yarn build
-cd ..
+export HTML="sail.html"
+yarn --cwd ./front build
+cp ./front/dist/* ./server/static/ -R
+export HTML="memo.html"
+yarn --cwd ./front build
+cp ./front/dist/* ./server/static/ -R
+export HTML="diary.html"
+yarn --cwd ./front build
 cp ./front/dist/* ./server/static/ -R
 find ./front/dist -delete
 

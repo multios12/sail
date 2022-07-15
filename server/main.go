@@ -41,6 +41,8 @@ func main() {
 	router := gin.Default()
 	router.GET("/sail.html", getStatic)
 	router.GET("/memo.html", getStatic)
+	router.GET("/diary.html", getStatic)
+	router.GET("/assets/:file", getStatic)
 	router.GET("/favicon.ico", getStatic)
 	balance.Initial(router, dataPath, password)
 	memo.Initial(router, dataPath)

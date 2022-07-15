@@ -1,5 +1,4 @@
 <script lang="ts">
-  import "bulma/css/bulma.css";
   import Router from "svelte-spa-router";
   import List from "./routes/List.svelte";
   import Edit from "./routes/Edit.svelte";
@@ -11,3 +10,7 @@
 </script>
 
 <Router {routes} />
+
+<style>
+  @import url("bulma/css/bulma.css");
+</style>
