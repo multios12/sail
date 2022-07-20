@@ -5,12 +5,14 @@ import (
 	"errors"
 	"flag"
 	"fmt"
+	"log"
 	"net/http"
 	"os"
 	"path/filepath"
 
 	"github.com/gin-gonic/gin"
 	"github.com/multios12/sail/balance"
+	"github.com/multios12/sail/diary"
 	"github.com/multios12/sail/memo"
 )
 
@@ -46,6 +48,7 @@ func main() {
 	router.GET("/favicon.ico", getStatic)
 	balance.Initial(router, dataPath, password)
 	memo.Initial(router, dataPath)
+	diary.Initial(router, dataPath)
 
 	router.Run(port)
 }
@@ -65,7 +68,7 @@ func validateArgs() error {
 	}
 
 	if password == "" {
-		println("[warning]パスワードが設定されていないため、明細の取り込みに失敗する可能性があります。")
+		log.Println("warning: パスワードが設定されていないため、明細の取り込みに失敗する可能性があります。")
 	}
 
 	return nil

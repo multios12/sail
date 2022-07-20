@@ -3,6 +3,7 @@ package balance
 import (
 	"fmt"
 	"io"
+	"log"
 	"net/http"
 	"os"
 	"path"
@@ -15,11 +16,11 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-var salaryPath string  // データディレクトリ
+var balancePath string // データディレクトリ
 var pdfPassword string // PDFパスワード
 
 func Initial(router *gin.Engine, dataPath string, password string) {
-	salaryPath = path.Join(dataPath, "salary")
+	balancePath = path.Join(dataPath, "balance")
 	pdfPassword = password
 	dbOpen(dataPath)
 
@@ -29,6 +30,9 @@ func Initial(router *gin.Engine, dataPath string, password string) {
 		println(err)
 		return
 	}
+	log.Println("info: balance:salaryPath:" + balancePath)
+	log.Println("info: balance:dbPath    :" + filepath.Join(balancePath, "db"))
+	log.Println("info: balance:data[count:" + strconv.Itoa(len(Salaries)) + "]")
 
 	router.GET("/api/balance/:year", getBalanceYear)
 	router.GET("/api/balance/:year/:month", getBalanceMonth)
@@ -167,7 +171,7 @@ func getSalaryMonth(c *gin.Context) {
 // 給与月単位データ再作成 PUT API
 func putSalaryMonth(c *gin.Context) {
 	m := c.Param("year") + c.Param("month")
-	filename := filepath.Join(salaryPath, m)
+	filename := filepath.Join(balancePath, m)
 
 	if _, err := os.Stat(filename); err == nil {
 		err := os.RemoveAll(filename)
@@ -178,7 +182,7 @@ func putSalaryMonth(c *gin.Context) {
 	}
 
 	// PDFファイルの変換とデータ再読み込み
-	Convert(salaryPath)
+	Convert(balancePath)
 	var err error
 	Salaries, err = readAllData()
 	if err != nil {
@@ -198,7 +202,7 @@ func putSalaryMonth(c *gin.Context) {
 // 月単位画像 GET API
 func getSalaryDetailImage(c *gin.Context) {
 	m := c.Param("year") + c.Param("month")
-	filename := filepath.Join(salaryPath, m, c.Param("file"))
+	filename := filepath.Join(balancePath, m, c.Param("file"))
 	c.File(filename)
 }
 
@@ -209,7 +213,7 @@ func postFiles(c *gin.Context) {
 		return
 	}
 
-	filename := filepath.Join(salaryPath, "_pdf", header.Filename)
+	filename := filepath.Join(balancePath, "_pdf", header.Filename)
 	outFile, err := os.Create(filename)
 	if err != nil {
 		c.String(http.StatusInternalServerError, err.Error())
@@ -224,7 +228,7 @@ func postFiles(c *gin.Context) {
 	}
 	outFile.Close()
 
-	err = createData(salaryPath, filename)
+	err = createData(balancePath, filename)
 	if err != nil {
 		c.String(http.StatusInternalServerError, err.Error())
 		return

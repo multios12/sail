@@ -2,7 +2,9 @@ package memo
 
 import (
 	"fmt"
+	"log"
 	"net/http"
+	"path/filepath"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
@@ -16,6 +18,9 @@ func Initial(router *gin.Engine, dataPath string) {
 		fmt.Sprintln(err)
 		return
 	}
+	memos := find()
+	log.Println("info: memo[dataPath=" + filepath.Join(dataPath, "hmemo") + "]")
+	log.Println("info: memo[count=" + strconv.Itoa(len(memos)) + "]")
 
 	// ルーティング
 	router.GET("/api/memos", getMemos)

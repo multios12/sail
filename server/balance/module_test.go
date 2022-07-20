@@ -5,7 +5,7 @@ import (
 )
 
 func TestReadAllData(t *testing.T) {
-	salaryPath = "../../data/"
+	balancePath = "../../data/"
 	v, _ := readAllData()
 	if len(v) == 0 {
 		t.Fail()

@@ -11,7 +11,7 @@ import (
 var db *gorm.DB
 
 func dbOpen(dataPath string) (err error) {
-	filename := filepath.Join(dataPath, "memo")
+	filename := filepath.Join(dataPath, "hmemo")
 	db, err = gorm.Open(sqlite.Open(filename), &gorm.Config{})
 	if err != nil {
 		return err

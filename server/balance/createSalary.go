@@ -26,7 +26,7 @@ func createSalaryData(dataPath string, filename string, src string, pages string
 		month += "S"
 	}
 
-	monthPath := filepath.Join(salaryPath, month)
+	monthPath := filepath.Join(balancePath, month)
 	if _, err := os.Stat(monthPath); !os.IsNotExist(err) {
 		return err
 	}

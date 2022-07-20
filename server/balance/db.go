@@ -15,8 +15,8 @@ import (
 var db *gorm.DB
 
 // データベースオープン
-func dbOpen(dataPath string) (err error) {
-	filename := filepath.Join(dataPath, "db")
+func dbOpen(salaryPath string) (err error) {
+	filename := filepath.Join(salaryPath, "db")
 	db, err = gorm.Open(sqlite.Open(filename), &gorm.Config{})
 	db.AutoMigrate(&Balance{})
 	return err
