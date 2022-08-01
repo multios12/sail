@@ -3,8 +3,10 @@ package diary
 import (
 	"bufio"
 	"io"
+	"io/fs"
 	"io/ioutil"
 	"os"
+	"path"
 	"path/filepath"
 	"regexp"
 	"sort"
@@ -15,9 +17,13 @@ import (
 var diaryPath string
 
 type lineModel struct {
-	Day  string // 日付(yyyy-mm-dd形式)
-	Memo string // 本文
+	Day        string   // 日付(yyyy-mm-dd形式)
+	Outline    string   // 概要
+	Tags       []string // タグ
+	Detail     string   // 詳細
+	HMemoCount int      // HMemo数
 }
+
 type listModel struct {
 	WritedMonths []string // 記載された年月(yyyy-mm形式)
 	Lines        []lineModel
@@ -30,7 +36,7 @@ func getWritedMonths() []string {
 		return months
 	}
 
-	r := regexp.MustCompile(`\d\d\d\d\d\d\.txt`)
+	r := regexp.MustCompile(`^\d\d\d\d\d\d\.txt$`)
 
 	for _, f := range l {
 		if !f.IsDir() && r.MatchString(f.Name()) {
@@ -53,26 +59,76 @@ func readLine(day string) lineModel {
 	lines := readMonthFile(day[0:4] + day[5:7])
 	for _, l := range lines {
 		if day == l.Day {
+			// 詳細ファイルの取得
+			filename := strings.ReplaceAll(day, "-", "") + ".txt"
+			filename = path.Join(diaryPath, filename)
+			if _, err := os.Stat(filename); err == nil {
+				b, err := ioutil.ReadFile(filename)
+				if err != nil {
+					return l
+				}
+				body := string(b)
+				lines := strings.Split(body, "\n")
+				if len(lines) > 3 {
+					body = strings.Join(lines[3:], "\n")
+				}
+				l.Detail = body
+			}
 			return l
 		}
 	}
 	return lineModel{}
 }
 
-func writeLine(day string, memo string) error {
+func writeLine(day string, outline string, tags []string, detail string) error {
 	month := day[0:4] + day[5:7]
+
+	// monthファイルの更新
 	lines := readMonthFile(month)
 	flag := false
 	for i, l := range lines {
 		if day == l.Day {
-			lines[i].Memo = memo
+			lines[i].Outline = outline
+			lines[i].Tags = tags
 			flag = true
 		}
-		lines[i].Memo = strings.TrimSpace(lines[i].Memo)
+		lines[i].Outline = strings.TrimSpace(lines[i].Outline)
 	}
 	if !flag || len(lines) == 0 {
-		lines = append(lines, lineModel{day, memo})
+		lines = append(lines, lineModel{day, outline, []string{}, "", 0})
 	}
+
+	// 詳細ファイルの更新
+	filename := strings.ReplaceAll(day, "-", "") + ".txt"
+	filename = path.Join(diaryPath, filename)
+	if len(detail) == 0 {
+		if _, err := os.Stat(filename); err == nil {
+			os.Remove(filename)
+		}
+		return writeMonthFile(month, lines)
+	}
+
+	data := day + "\n" + outline + "\n" + strings.Join(tags, "#") + "\n" + detail
+	ioutil.WriteFile(filename, []byte(data), fs.ModePerm)
+	return writeMonthFile(month, lines)
+}
+
+func deleteLine(day string) error {
+	month := day[0:4] + day[5:7]
+	lines := readMonthFile(month)
+	for i, l := range lines {
+		if day == l.Day {
+			lines = append(lines[:i], lines[i+1:]...)
+			break
+		}
+	}
+
+	filename := strings.ReplaceAll(day, "-", "") + ".txt"
+	filename = path.Join(diaryPath, filename)
+	if _, err := os.Stat(filename); err == nil {
+		os.Remove(filename)
+	}
+
 	return writeMonthFile(month, lines)
 }
 
@@ -104,8 +160,14 @@ func readMonthFile(month string) []lineModel {
 		day := s[0:10]
 		s = s[11:]
 
-		d := lineModel{day, s}
-		lines = append(lines, d)
+		tags := strings.Split(s, "#")
+		if len(tags) > 1 {
+			d := lineModel{day, tags[len(tags)-1], tags[:len(tags)-1], "", 0}
+			lines = append(lines, d)
+		} else {
+			d := lineModel{day, s, []string{}, "", 0}
+			lines = append(lines, d)
+		}
 	}
 
 	return lines
@@ -119,8 +181,17 @@ func writeMonthFile(month string, lines []lineModel) error {
 		if dataFile != "" {
 			dataFile += "\n"
 		}
-		dataFile += l.Day + " " + l.Memo
+		l.Outline = strings.ReplaceAll(l.Outline, "#", "")
+		dataFile += l.Day + " "
+		if len(l.Tags) > 0 {
+			dataFile += strings.Join(l.Tags, "#") + "#"
+		}
+		dataFile += l.Outline
 	}
-	p := filepath.Join(diaryPath, month+".txt")
-	return ioutil.WriteFile(p, []byte(dataFile), os.ModePerm)
+	filename := filepath.Join(diaryPath, month+".txt")
+
+	if len(lines) == 0 {
+		return os.Remove(filename)
+	}
+	return ioutil.WriteFile(filename, []byte(dataFile), os.ModePerm)
 }

@@ -19,7 +19,7 @@ func Initial(router *gin.Engine, dataPath string) {
 	router.GET("/api/diary/:year/:month", getMonth)
 	router.GET("/api/diary/:year/:month/:day", getDay)
 	router.POST("/api/diary/:year/:month/:day", postDay)
-	router.POST("/api/diary/detail", postDetail)
+	router.DELETE("/api/diary/:year/:month/:day", deleteDay)
 }
 
 func getMonth(c *gin.Context) {
@@ -43,23 +43,16 @@ func postDay(c *gin.Context) {
 	var line lineModel
 	if err := c.ShouldBindJSON(&line); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-	} else if line.Memo = strings.TrimSpace(line.Memo); line.Memo == "" {
+	} else if line.Outline = strings.TrimSpace(line.Outline); line.Outline == "" {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "memo is not found."})
 	} else {
-		writeLine(day, line.Memo)
+		writeLine(day, line.Outline, line.Tags, line.Detail)
 		c.Status(http.StatusOK)
 	}
 }
 
-func postDetail(c *gin.Context) {
-	var d detail
-	err := c.ShouldBindJSON(&d)
-	if err == nil {
-		err = writeDetail(d)
-	}
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-	} else {
-		c.Status(http.StatusOK)
-	}
+func deleteDay(c *gin.Context) {
+	day := c.Param("year") + "-" + c.Param("month") + "-" + c.Param("day")
+	deleteLine(day)
+	c.Status(http.StatusOK)
 }
