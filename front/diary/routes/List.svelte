@@ -1,8 +1,8 @@
 <script lang="ts">
   import { onMount } from "svelte";
-  import type { lineType, listType } from "../components/models";
+  import type { detailType, lineType, listType } from "../components/models";
   import Detail from "../components/Detail.svelte";
-  let edit: lineType = { Day: "", Outline: "", Tags: [], Detail: "" };
+  let edit: detailType = { Day: "", Outline: "", Tags: [], Detail: "" };
   let model: listType = { WritedMonths: [], Lines: [] };
   let isDayEdit: boolean;
   let selectMonth = "2022-02";
@@ -25,7 +25,7 @@
     let url = l.Day.replaceAll("-", "/");
     url = `./api/diary/${url}`;
     const r = await fetch(url, { method: "get" }).then((r) => r.json());
-    const s = r as lineType;
+    const s = r as detailType;
     edit = s;
   };
 
@@ -84,14 +84,24 @@
         <tbody>
           {#each model.Lines as v}
             <tr on:click={(e) => listClick(e, v)}>
-              <td>{v.Day} {v.Outline}</td>
+              <td>
+                <span>
+                  {v.Day}
+
+                  {v.Outline}{#if v.IsDetail}<i
+                      class="material-icons has-text-grey-light"
+                      style="vertical-align:middle">note</i
+                    >{/if}</span
+                >
+              </td>
               <td>
                 <div class="tags are-medium">
                   {#each v.Tags as t}
                     <span class="tag">{t}</span>
                   {/each}
-                  <i class="material-icons">note</i>
-                  <i class="material-icons">local_activity</i>
+                  {#if v.HCount > 0}
+                    <i class="material-icons">local_activity</i>
+                  {/if}
                 </div>
               </td>
             </tr>

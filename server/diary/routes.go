@@ -17,42 +17,47 @@ func Initial(router *gin.Engine, dataPath string) {
 		os.Mkdir(diaryPath, 0777)
 	}
 	router.GET("/api/diary/:year/:month", getMonth)
-	router.GET("/api/diary/:year/:month/:day", getDay)
-	router.POST("/api/diary/:year/:month/:day", postDay)
-	router.DELETE("/api/diary/:year/:month/:day", deleteDay)
+	router.GET("/api/diary/:year/:month/:day", getDetail)
+	router.POST("/api/diary/:year/:month/:day", postDetail)
+	router.DELETE("/api/diary/:year/:month/:day", deleteDetail)
 }
 
 func getMonth(c *gin.Context) {
-	m := c.Param("year") + c.Param("month")
-	var l = listModel{Lines: readMonthFile(m), WritedMonths: getWritedMonths()}
-	c.JSON(200, l)
+	month := c.Param("year") + c.Param("month")
+	var m = newListModel(month)
+	m.WritedMonths = getWritedMonths()
+	c.JSON(200, m)
 }
 
-func getDay(c *gin.Context) {
+func getDetail(c *gin.Context) {
 	day := c.Param("year") + "-" + c.Param("month") + "-" + c.Param("day")
-	if l := readLine(day); len(l.Day) == 0 {
+	if l := readDetail(day); len(l.Day) == 0 {
 		c.Status(http.StatusNotFound)
 	} else {
 		c.JSON(http.StatusOK, l)
 	}
 }
 
-func postDay(c *gin.Context) {
+func postDetail(c *gin.Context) {
 	day := c.Param("year") + "-" + c.Param("month") + "-" + c.Param("day")
 
-	var line lineModel
-	if err := c.ShouldBindJSON(&line); err != nil {
+	var detail detailModel
+	if err := c.ShouldBindJSON(&detail); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-	} else if line.Outline = strings.TrimSpace(line.Outline); line.Outline == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "memo is not found."})
+	} else if detail.Outline = strings.TrimSpace(detail.Outline); detail.Outline == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "outline is not found."})
 	} else {
-		writeLine(day, line.Outline, line.Tags, line.Detail)
+		detail.Day = day
+		writeDetail(detail)
 		c.Status(http.StatusOK)
 	}
 }
 
-func deleteDay(c *gin.Context) {
+func deleteDetail(c *gin.Context) {
 	day := c.Param("year") + "-" + c.Param("month") + "-" + c.Param("day")
-	deleteLine(day)
-	c.Status(http.StatusOK)
+	if err := removeDetail(day); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+	} else {
+		c.Status(http.StatusOK)
+	}
 }

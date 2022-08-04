@@ -7,6 +7,6 @@
 /server/__debug_bin
 /server/__debug_bin.exe
 /server/static/static
-/server/static/index.html
+/server/static/*.html
 /server/static/favicon.ico
 /server/static/asset-manifest.json

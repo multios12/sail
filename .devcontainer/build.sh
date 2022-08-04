@@ -3,7 +3,7 @@
 export HTML="sail.html"
 yarn --cwd ./front build
 cp ./front/dist/* ./server/static/ -R
-export HTML="memo.html"
+export HTML="hmemo.html"
 yarn --cwd ./front build
 cp ./front/dist/* ./server/static/ -R
 export HTML="diary.html"
