@@ -24,7 +24,7 @@ func Initial(router *gin.Engine, dataPath string) {
 
 func getMonth(c *gin.Context) {
 	month := c.Param("year") + c.Param("month")
-	var m = newListModel(month)
+	var m = readListFile(month)
 	m.WritedMonths = getWritedMonths()
 	c.JSON(200, m)
 }
@@ -48,7 +48,9 @@ func postDetail(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "outline is not found."})
 	} else {
 		detail.Day = day
-		writeDetail(detail)
+		if err = detail.writeDetailFile(); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		}
 		c.Status(http.StatusOK)
 	}
 }

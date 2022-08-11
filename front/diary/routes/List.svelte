@@ -34,12 +34,14 @@
     url = `./api/diary/${url}`;
     const r = await fetch(url).then((r) => r.json());
     model = r as listType;
-    if (model.Lines.length == 0 && model.WritedMonths.length > 0) {
+    if (model.Lines != null && model.WritedMonths.length > 0) {
       selectMonth = model.WritedMonths[0];
-      let url = selectMonth.replace("-", "/");
+      let url = selectMonth.substring(0, 4) + "/" + selectMonth.substring(5, 7);
       url = `./api/diary/${url}`;
       const r = await fetch(url).then((r) => r.json());
       model = r as listType;
+    } else {
+      model.Lines = [];
     }
   };
 
@@ -87,7 +89,6 @@
               <td>
                 <span>
                   {v.Day}
-
                   {v.Outline}{#if v.IsDetail}<i
                       class="material-icons has-text-grey-light"
                       style="vertical-align:middle">note</i

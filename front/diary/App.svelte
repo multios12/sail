@@ -1,9 +1,5 @@
 <script lang="ts">
-  import Router from "svelte-spa-router";
   import List from "./routes/List.svelte";
-  const routes = {
-    "/": List,
-  };
 </script>
 
 <nav class="navbar is-dark" aria-label="main navigation">
@@ -12,7 +8,7 @@
   </div>
 </nav>
 <main>
-  <Router {routes} />
+  <List />
 </main>
 
 <style>

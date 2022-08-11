@@ -1,6 +1,6 @@
 <script lang="ts">
   import { createEventDispatcher, onMount } from "svelte";
-  import BulmaTagsInput from "@creativebulma/bulma-tagsinput";
+  import TagsInput from "./TagsInput.svelte";
 
   const dispatch = createEventDispatcher();
   export let isDayEdit: boolean;
@@ -15,14 +15,11 @@
       return;
     }
 
-    let inputTags = document.getElementById("input-tags") as any;
-    Tags = inputTags.BulmaTagsInput().items;
-
     let url = Day.replaceAll("-", "/");
     url = `./api/diary/${url}`;
     const init = {
       method: "post",
-      body: JSON.stringify({ Tags: Tags, Outline: Outline, Detail: Detail }),
+      body: JSON.stringify({ Tags, Outline, Detail }),
     };
     await fetch(url, init);
     Day = "";
@@ -40,23 +37,6 @@
     Day = "";
     dispatch("update");
   };
-
-  /** onMount イベント */
-  onMount(() => {
-    var inputTags = document.getElementById("input-tags");
-    new BulmaTagsInput(inputTags);
-  });
-
-  /** パラメータ[Tag] computed */
-  $: {
-    let inputTags = document.getElementById("input-tags") as any;
-    if (inputTags != null) {
-      inputTags.BulmaTagsInput().flush();
-      if (Tags.length > 0) {
-        inputTags.BulmaTagsInput().add(Tags);
-      }
-    }
-  }
 </script>
 
 <div class="modal" class:is-active={Day != ""}>
@@ -83,13 +63,7 @@
       />
       <div class="field">
         <div class="control">
-          <input
-            id="input-tags"
-            class="input"
-            type="text"
-            data-type="tags"
-            placeholder="Choose Tags"
-          />
+          <TagsInput bind:items={Tags} />
         </div>
         <textarea class="textarea" placeholder="detail" bind:value={Detail} />
       </div>
@@ -100,7 +74,3 @@
     </footer>
   </div>
 </div>
-
-<style>
-  @import url("@creativebulma/bulma-tagsinput/dist/css/bulma-tagsinput.min.css");
-</style>

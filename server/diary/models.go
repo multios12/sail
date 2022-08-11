@@ -1,72 +1,12 @@
 package diary
 
 import (
-	"bufio"
-	"io"
 	"io/fs"
 	"io/ioutil"
 	"os"
 	"path"
-	"path/filepath"
-	"sort"
 	"strings"
 )
-
-type listModel struct {
-	WritedMonths []string // 記載された年月(yyyy-mm形式)
-	Lines        []lineModel
-}
-
-func newListModel(month string) *listModel {
-	p := filepath.Join(diaryPath, month+".txt")
-
-	l := new(listModel)
-	if _, err := os.Stat(p); err != nil {
-		return l
-	}
-
-	fp, err := os.Open(p)
-	if err != nil {
-		panic(err)
-	}
-	defer fp.Close()
-
-	reader := bufio.NewReaderSize(fp, 5000)
-	var lines []lineModel
-	for {
-		line, _, err := reader.ReadLine()
-		if err == io.EOF {
-			break
-		}
-		if err != nil {
-			panic(err)
-		}
-
-		s := string(line)
-		d := newLineModel(s)
-		l.Lines = append(lines, *d)
-	}
-
-	return l
-}
-
-func (l *listModel) writeMonthFile(month string) error {
-	sort.Slice(l.Lines, func(i, j int) bool { return l.Lines[i].Day > l.Lines[j].Day })
-
-	dataFile := ""
-	for _, l := range l.Lines {
-		if dataFile != "" {
-			dataFile += "\n"
-		}
-		dataFile += l.toString()
-	}
-	filename := filepath.Join(diaryPath, month+".txt")
-
-	if len(l.Lines) == 0 {
-		return os.Remove(filename)
-	}
-	return ioutil.WriteFile(filename, []byte(dataFile), os.ModePerm)
-}
 
 // 月ファイルの行を表すモデル
 type lineModel struct {
@@ -119,7 +59,7 @@ type detailModel struct {
 	Detail  string   // 詳細
 }
 
-func newDetailModel(l lineModel) *detailModel {
+func readDetailFile(l lineModel) *detailModel {
 	d := new(detailModel)
 	// 詳細ファイルの取得
 	filename := strings.ReplaceAll(l.Day, "-", "") + ".txt"
@@ -143,17 +83,24 @@ func newDetailModel(l lineModel) *detailModel {
 }
 
 // 詳細情報を書き込む
-func (l *detailModel) WriteDetail() {
+func (d *detailModel) writeDetailFile() error {
+	month := d.Day[0:4] + d.Day[5:7]
+
+	// monthファイルの更新
+	m := readListFile(month)
+	target := lineModel{d.Day, d.Outline, d.Tags, len(d.Detail) > 0, 0}
+	m.updateLine(month, target)
+
 	// 詳細ファイルの更新
-	filename := strings.ReplaceAll(l.Day, "-", "") + ".txt"
+	filename := strings.ReplaceAll(d.Day, "-", "") + ".txt"
 	filename = path.Join(diaryPath, filename)
-	if len(l.Detail) == 0 {
+	if len(d.Detail) == 0 {
 		if _, err := os.Stat(filename); err == nil {
-			os.Remove(filename)
+			return os.Remove(filename)
 		}
-		return
+		return nil
 	}
 
-	data := l.Day + "\n" + l.Outline + "\n" + strings.Join(l.Tags, "#") + "\n" + l.Detail
-	ioutil.WriteFile(filename, []byte(data), fs.ModePerm)
+	data := d.Day + "\n" + d.Outline + "\n" + strings.Join(d.Tags, "#") + "\n" + d.Detail
+	return ioutil.WriteFile(filename, []byte(data), fs.ModePerm)
 }

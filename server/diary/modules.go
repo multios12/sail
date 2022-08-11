@@ -31,7 +31,7 @@ func getWritedMonths() []string {
 	if len(months) > 0 {
 		sort.Slice(months, func(i int, j int) bool { return months[i] > months[j] })
 	} else {
-		months = append(months, time.Now().Format("200601"))
+		months = append(months, time.Now().Format("2006-01"))
 	}
 
 	return months
@@ -39,42 +39,18 @@ func getWritedMonths() []string {
 
 // ----------------------------------------------------------------------------
 func readDetail(day string) detailModel {
-	m := newListModel(day[0:4] + day[5:7])
+	m := readListFile(day[0:4] + day[5:7])
 	for _, l := range m.Lines {
 		if day == l.Day {
-			return *newDetailModel(l)
+			return *readDetailFile(l)
 		}
 	}
 	return detailModel{}
 }
 
-func writeDetail(line detailModel) error {
-	month := line.Day[0:4] + line.Day[5:7]
-
-	// monthファイルの更新
-	m := newListModel(month)
-	flag := false
-	for i, l := range m.Lines {
-		if line.Day == l.Day {
-			m.Lines[i].Outline = line.Outline
-			m.Lines[i].Tags = line.Tags
-			flag = true
-		}
-		m.Lines[i].IsDetail = len(line.Detail) > 0
-		m.Lines[i].Outline = strings.TrimSpace(m.Lines[i].Outline)
-	}
-	if !flag || len(m.Lines) == 0 {
-		m.Lines = append(m.Lines, lineModel{line.Day, line.Outline, []string{}, len(line.Detail) > 0, 0})
-	}
-
-	// 詳細ファイルの更新
-	line.WriteDetail()
-	return m.writeMonthFile(month)
-}
-
 func removeDetail(day string) error {
 	month := day[0:4] + day[5:7]
-	m := newListModel(month)
+	m := readListFile(month)
 	for i, l := range m.Lines {
 		if day == l.Day {
 			m.Lines = append(m.Lines[:i], m.Lines[i+1:]...)
@@ -88,5 +64,5 @@ func removeDetail(day string) error {
 		os.Remove(filename)
 	}
 
-	return m.writeMonthFile(month)
+	return m.writeListFile(month)
 }
