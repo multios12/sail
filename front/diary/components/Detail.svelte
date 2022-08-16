@@ -1,13 +1,40 @@
 <script lang="ts">
-  import { createEventDispatcher, onMount } from "svelte";
+  import { createEventDispatcher } from "svelte";
   import TagsInput from "./TagsInput.svelte";
+  import type { detailType, lineType, listType } from "../components/models";
 
   const dispatch = createEventDispatcher();
-  export let isDayEdit: boolean;
-  export let Day = "";
-  export let Outline = "";
-  export let Detail = "";
-  export let Tags = [];
+  export let Day: string | null;
+  let Outline = "";
+  let Detail = "";
+  let Tags = [];
+  let isDayEdit: boolean;
+
+  $: {
+    if (Day === undefined || Day === null) {
+    } else if (Day === "") {
+      isDayEdit = true;
+      const dt = new Date();
+      Day = `${dt.getFullYear()}-`;
+      Day += ("00" + (dt.getMonth() + 1)).slice(-2);
+      Day += `-${("00" + dt.getDate()).slice(-2)}`;
+      Outline = "";
+      Tags = [];
+      Detail = "";
+    } else {
+      isDayEdit = false;
+      let url = Day.replaceAll("-", "/");
+      url = `./api/diary/${url}`;
+      fetch(url, { method: "get" })
+        .then((r) => r.json())
+        .then((r) => {
+          const s = r as detailType;
+          Outline = s.Outline;
+          Detail = s.Detail;
+          Tags = s.Tags;
+        });
+    }
+  }
 
   /** 送信 クリックイベント */
   const sendClick = async () => {
@@ -22,24 +49,24 @@
       body: JSON.stringify({ Tags, Outline, Detail }),
     };
     await fetch(url, init);
-    Day = "";
+    Day = null;
     dispatch("update");
   };
 
   /** キャンセル クリックイベント */
-  const cancelClick = () => (Day = "");
+  const cancelClick = () => (Day = null);
 
   /** 削除 クリックイベント */
   const deleteClick = async () => {
     let url = Day.replaceAll("-", "/");
     url = `./api/diary/${url}`;
     await fetch(url, { method: "delete" });
-    Day = "";
+    Day = null;
     dispatch("update");
   };
 </script>
 
-<div class="modal" class:is-active={Day != ""}>
+<div class="modal" class:is-active={Day != null}>
   <div class="modal-background" />
   <div class="modal-card">
     <header class="modal-card-head sp-panel-heading">

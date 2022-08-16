@@ -1,33 +1,16 @@
 <script lang="ts">
   import { onMount } from "svelte";
-  import type { detailType, lineType, listType } from "../components/models";
+  import type { lineType, listType } from "../components/models";
   import Detail from "../components/Detail.svelte";
-  let edit: detailType = { Day: "", Outline: "", Tags: [], Detail: "" };
+  let editDay: string | null;
   let model: listType = { WritedMonths: [], Lines: [] };
-  let isDayEdit: boolean;
   let selectMonth = "2022-02";
 
-  const addClick = () => {
-    isDayEdit = true;
-    const dt = new Date();
-    edit.Day = `${dt.getFullYear()}-`;
-    edit.Day += ("00" + (dt.getMonth() + 1)).slice(-2);
-    edit.Day += `-${("00" + dt.getDate()).slice(-2)}`;
-    edit.Outline = "";
-    edit.Tags = [];
-    edit.Detail = "";
-  };
+  /** 追加ボタンクリックイベント */
+  const addClick = () => (editDay = "");
 
   /** リストクリックイベント */
-  const listClick = async (e: any, l: lineType) => {
-    isDayEdit = false;
-
-    let url = l.Day.replaceAll("-", "/");
-    url = `./api/diary/${url}`;
-    const r = await fetch(url, { method: "get" }).then((r) => r.json());
-    const s = r as detailType;
-    edit = s;
-  };
+  const listClick = async (e: any, l: lineType) => (editDay = l.Day);
 
   const showLines = async () => {
     let url = selectMonth.replace("-", "/");
@@ -53,14 +36,7 @@
   });
 </script>
 
-<Detail
-  {isDayEdit}
-  bind:Day={edit.Day}
-  Outline={edit.Outline}
-  Tags={edit.Tags}
-  Detail={edit.Detail}
-  on:update={showLines}
-/>
+<Detail bind:Day={editDay} on:update={showLines} />
 <div class="box">
   <div class="card px-10">
     <div class="card-content">
