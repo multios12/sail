@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { BalanceItem } from "../models";
+  import type { BalanceItem } from "../../diary/models/balanceModels";
   import { onMount } from "svelte";
   export let Value: BalanceItem;
 

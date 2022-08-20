@@ -1,7 +1,8 @@
 <script lang="ts">
-  import type { BalanceYear } from "../models";
-  import MuCostYearMonthTr from "../lib/CostMonthTr.svelte";
+  import type { BalanceYear } from "../../diary/models/balanceModels";
+  import MuCostYearMonthTr from "../components/BalanceCostMonthTr.svelte";
   import { link } from "svelte-spa-router";
+  import BalanceTabs from "../components/BalanceTabs.svelte";
 
   export let params: { year: string } = { year: undefined };
   $: {
@@ -20,6 +21,7 @@
   let editMonth = "";
 </script>
 
+<BalanceTabs />
 <div>
   {#each model.EnableYears as y}
     {#if y === model.Year}
@@ -53,7 +55,7 @@
       <div class="card">
         <div class="card-header">
           <div class="card-header-title">
-            <a href="/cost/{y}" use:link>{y}年</a>
+            <a href="/balance/cost/{y}" use:link>{y}年</a>
           </div>
         </div>
       </div>

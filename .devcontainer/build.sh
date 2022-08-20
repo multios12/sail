@@ -1,15 +1,8 @@
 #!/bin/sh
 
-export HTML="sail.html"
+export HTML="index.html"
 yarn --cwd ./front build
 cp ./front/dist/* ./server/static/ -R
-export HTML="hmemo.html"
-yarn --cwd ./front build
-cp ./front/dist/* ./server/static/ -R
-export HTML="diary.html"
-yarn --cwd ./front build
-cp ./front/dist/* ./server/static/ -R
-find ./front/dist -delete
 
 cd server
 GOOS=linux

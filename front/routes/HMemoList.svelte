@@ -1,10 +1,9 @@
 <script lang="ts">
-  import "bulma/css/bulma.css";
-  import { push } from "svelte-spa-router";
+  import { link, push } from "svelte-spa-router";
   import { onMount } from "svelte";
   let memos = [];
   const showEdit = (id: string) => {
-    push(`/${id}`);
+    push(`/h/${id}`);
   };
   onMount(async () => {
     const r = await fetch("./api/memos");
@@ -14,22 +13,20 @@
 
 <div class="card px-10">
   <div class="card-content">
+    <div class="columns">
+      <div class="column">
+        <a class="button is-primary" href="/h/add" use:link
+          ><i class="material-icons">add</i>add</a
+        >
+      </div>
+    </div>
+
     <table class="table is-striped is-hoverable is-fullwidth">
-      <thead>
-        <tr>
-          <th>date</th>
-          <th class="is-half">name</th>
-          <th>shop</th>
-          <th />
-        </tr>
-      </thead>
       <tbody>
         {#each memos as m}
           <tr>
-            <td on:click={() => showEdit(m.Id)}>{m.Date}</td>
-            <td on:click={() => showEdit(m.Id)}>{m.Name}</td>
+            <td on:click={() => showEdit(m.Id)}>{m.Date}&nbsp;{m.Name}</td>
             <td on:click={() => showEdit(m.Id)}>{m.Shop}</td>
-            <td><button /></td>
           </tr>
         {/each}
       </tbody>

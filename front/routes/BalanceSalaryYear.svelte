@@ -1,6 +1,7 @@
 <script lang="ts">
-  import type { SalaryModel } from "../models";
+  import type { SalaryModel } from "../../diary/models/balanceModels";
   import { link } from "svelte-spa-router";
+  import BalanceTabs from "../components/BalanceTabs.svelte";
 
   export let params: { year: string } = { year: undefined };
   $: {
@@ -19,6 +20,7 @@
   };
 </script>
 
+<BalanceTabs />
 <div>
   {#each model.EnableYears as year}
     {#if year === model.Year}
@@ -50,7 +52,7 @@
                 <tr class={Value.IsError ? "has-background-danger-light" : ""}>
                   <td
                     ><a
-                      href="/salary/{Value.Month.substring(
+                      href="/balance/salary/{Value.Month.substring(
                         0,
                         4
                       )}/{Value.Month.substring(4)}"
@@ -89,7 +91,7 @@
       <div class="card">
         <div class="card-header">
           <div class="card-header-title">
-            <a href="/salary/{year}" use:link>{year}年</a>
+            <a href="/balance/salary/{year}" use:link>{year}年</a>
           </div>
         </div>
       </div>

@@ -1,6 +1,6 @@
 <script lang="ts">
-  import type { BalanceYear } from "../models";
-  import HomeMonthTr from "./HomeMonthTr.svelte";
+  import type { BalanceYear } from "../../diary/models/balanceModels";
+  import HomeMonthTr from "./BalanceHomeMonthTr.svelte";
   import { link } from "svelte-spa-router";
 
   export let year: string;
@@ -21,8 +21,8 @@
           <tr>
             <th />
             <th>給与総額</th>
-            <th><a href="/salary/{year}" use:link>振込額</a></th>
-            <th><a href="/cost/{year}" use:link>固定支出額</a></th>
+            <th><a href="/balance/salary/{year}" use:link>振込額</a></th>
+            <th><a href="/balance/cost/{year}" use:link>固定支出額</a></th>
             <th>貯蓄額</th>
             <th>メモ</th>
             <th />
@@ -40,7 +40,7 @@
   <div class="card">
     <div class="card-header">
       <div class="card-header-title">
-        <a href="/{year}" use:link>{year}年</a>
+        <a href="/balance/{year}" use:link>{year}年</a>
       </div>
     </div>
   </div>

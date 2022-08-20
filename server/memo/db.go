@@ -2,6 +2,7 @@ package memo
 
 import (
 	"path/filepath"
+	"time"
 
 	"github.com/glebarez/sqlite"
 	"gorm.io/gorm"
@@ -31,6 +32,15 @@ func findById(id string) (memos []Memo) {
 	return memos
 }
 
+func findByMonth(month string) (memos []Memo) {
+	from := month + "-01"
+	toDate, _ := time.Parse("2006-01-02", from)
+	toDate = toDate.AddDate(0, 1, 0).AddDate(0, 0, -1)
+	to := toDate.Format("2006-01-02")
+	db.Where("date >= ? and date <= ?", from, to).Find(&memos)
+	return memos
+}
+
 func upsertMemo(m Memo) {
 	db.Clauses(clause.OnConflict{
 		UpdateAll: true,
@@ -38,5 +48,5 @@ func upsertMemo(m Memo) {
 }
 
 func deleteMemo(id string) {
-
+	db.Delete(&Memo{}, id)
 }

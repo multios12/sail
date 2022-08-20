@@ -1,6 +1,6 @@
 <script lang="ts">
   import { onMount } from "svelte";
-  import type { BalanceItem } from "src/models";
+  import type { BalanceItem } from "../../diary/models/balanceModels";
 
   export let editMonth: String;
   export let model: BalanceItem;

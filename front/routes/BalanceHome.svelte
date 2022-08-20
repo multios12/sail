@@ -1,6 +1,7 @@
 <script lang="ts">
-  import type { BalanceYear } from "../models";
-  import YearCard from "../lib/HomeYearCard.svelte";
+  import type { BalanceYear } from "../../diary/models/balanceModels";
+  import YearCard from "../components/BalanceHomeYearCard.svelte";
+  import BalanceTabs from "../components/BalanceTabs.svelte";
 
   export let params: { year: string } = { year: undefined };
   $: {
@@ -17,6 +18,7 @@
   };
 </script>
 
+<BalanceTabs />
 <div>
   {#each model.EnableYears as year}
     <YearCard {year} {model} />

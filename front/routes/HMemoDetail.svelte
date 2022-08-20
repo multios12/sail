@@ -1,6 +1,5 @@
 <script lang="ts">
-  import "bulma/css/bulma.css";
-  import { push } from "svelte-spa-router";
+  import { pop, push } from "svelte-spa-router";
   import { onMount } from "svelte";
 
   type memoType = {
@@ -29,7 +28,7 @@
   let errMessage = "";
   let isLoading = false;
 
-  const regist = () => {
+  const sendClick = () => {
     isLoading = true;
     let url = "./api/memos";
     url += params.id === "add" ? "" : `/${params.id}`;
@@ -41,7 +40,7 @@
       o = { method: "post", body: JSON.stringify(memo) };
     }
     fetch(url, o)
-      .then(() => push("/"))
+      .then(() => push("/h/"))
       .catch((res) => {
         errMessage = res.response.data.error;
         isErr = true;
@@ -49,6 +48,12 @@
       .finally(() => {
         isLoading = false;
       });
+  };
+
+  const deleteClick = async () => {
+    let url = `./api/memos/${params.id}`;
+    await fetch(url, { method: "delete" });
+    pop();
   };
 
   onMount(async () => {
@@ -64,6 +69,15 @@
 </script>
 
 <div class="card px-10">
+  <header class="card-header">
+    <p class="card-header-title" />
+    <button
+      class="button is-inverted is-small has-text-danger sp-right"
+      on:click={deleteClick}
+    >
+      <i class="material-icons">delete</i>
+    </button>
+  </header>
   <div class="card-content">
     {#if errMessage != ""}
       <div class="notification is-danger">{errMessage}</div>
@@ -113,9 +127,9 @@
         <button
           class="button is-primary mx-5"
           class:is-loading={isLoading}
-          on:click={() => regist()}>ok</button
+          on:click={() => sendClick()}>ok</button
         >
-        <button class="button is-light mx-5" on:click={() => push("/")}
+        <button class="button is-light mx-5" on:click={() => push("/h/")}
           >cancel</button
         >
       </div>

@@ -30,7 +30,12 @@ func Initial(router *gin.Engine, dataPath string) {
 	router.DELETE("/api/memos/:id", deleteMemosId)
 }
 func getMemos(c *gin.Context) {
-	memos := find()
+	var memos []Memo
+	if len(c.Query("month")) == 0 {
+		memos = find()
+	} else {
+		memos = findByMonth(c.Query("month"))
+	}
 	createResponse(c, memos, nil)
 }
 
