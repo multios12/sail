@@ -28,9 +28,17 @@ func createSalaryData(dataPath string, filename string, src string, pages string
 
 	monthPath := filepath.Join(balancePath, month)
 	if _, err := os.Stat(monthPath); !os.IsNotExist(err) {
-		return err
+		files, _ := filepath.Glob(filepath.Join(monthPath, "salary*.png"))
+		for _, filename := range files {
+			os.Remove(filename)
+		}
+		files, _ = filepath.Glob(filepath.Join(monthPath, "salary*.txt"))
+		for _, filename := range files {
+			os.Remove(filename)
+		}
+	} else {
+		os.Mkdir(monthPath, os.ModePerm)
 	}
-	os.Mkdir(monthPath, os.ModePerm)
 
 	// 画像
 	dist := filepath.Join(monthPath, "salary")
