@@ -18,16 +18,17 @@ type Balance struct {
 	Paid    int    // 差引支給額
 	Expense int    // 経費支給額
 
-	Cost         int  // 固定支出総額
-	IsNotCost    bool // 固定支出額未入力あり
-	CostWater    int  // 水道料金
-	CostElectric int  // 電気料金
-	CostGas      int  // ガス料金
-	CostMobile   int  // 携帯料金
-	CostLine     int  // 通信料金
-	CostTax      int  // 納税
+	Cost         int  `gorm:"default:0;"` // 固定支出総額
+	IsNotCost    bool `gorm:"default:0;"` // 固定支出額未入力あり
+	CostHousing  int  `gorm:"default:0;"` // 費用：住宅
+	CostWater    int  `gorm:"default:0;"` // 費用：水道
+	CostElectric int  `gorm:"default:0;"` // 費用：電気
+	CostGas      int  `gorm:"default:0;"` // 費用：ガス
+	CostMobile   int  `gorm:"default:0;"` // 費用：携帯
+	CostLine     int  `gorm:"default:0;"` // 費用：通信
+	CostTax      int  `gorm:"default:0;"` // 費用：納税
 
-	Saving    int       // 貯蓄額
+	Saving    int       `gorm:"default:0;"` // 貯蓄額
 	Memo      string    // メモ
 	CreatedAt time.Time // 作成時に値がゼロ値の場合、現在時間がセットされる
 	UpdatedAt time.Time // 更新時、または作成時の値がゼロ値の場合、現在のUNIX秒がセットされる

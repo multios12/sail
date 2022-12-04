@@ -4,6 +4,7 @@
   export let Value: BalanceItem;
 
   export let editMonth: string;
+  let Housing = Value.CostHousing;
   let Water = Value.CostWater;
   let Electric = Value.CostElectric;
   let Gas = Value.CostGas;
@@ -28,6 +29,7 @@
     )}/${Value.Month.toString().substring(4)}`;
     const d = {
       Month: Value.Month,
+      CostHousing: Housing,
       CostWater: Water,
       CostElectric: Electric,
       CostGas: Gas,
@@ -44,7 +46,14 @@
   <tr>
     <td>{`${Value.Month.substring(0, 4)}年${Value.Month.substring(4)}月`}</td>
     <td class="MuNumber px-0 has-text-right"
-      >{Water + Electric + Gas + Mobile + Line + Tax}</td
+      >{Housing + Water + Electric + Gas + Mobile + Line + Tax}</td
+    >
+    <td class="MuNumber p-0 has-text-right"
+      ><input
+        type="number"
+        class="input px-0 has-text-right"
+        bind:value={Housing}
+      /></td
     >
     <td class="MuNumber p-0 has-text-right"
       ><input
@@ -99,14 +108,15 @@
   <tr>
     <td>{`${Value.Month.substring(0, 4)}年${Value.Month.substring(4)}月`}</td>
     <td class="MuNumber px-0 has-text-right"
-      >{Water + Electric + Gas + Mobile + Line + Tax}</td
+      >{(Housing + Water + Electric + Gas + Mobile + Line + Tax).toLocaleString()}</td
     >
-    <td class="MuNumber px-0 has-text-right pr-4">{Water}</td>
-    <td class="MuNumber px-0 has-text-right pr-4">{Electric}</td>
-    <td class="MuNumber px-0 has-text-right pr-4">{Gas}</td>
-    <td class="MuNumber px-0 has-text-right pr-4">{Mobile}</td>
-    <td class="MuNumber px-0 has-text-right pr-4">{Line}</td>
-    <td class="MuNumber px-0 has-text-right pr-4">{Tax}</td>
+    <td class="MuNumber px-0 has-text-right pr-4">{Housing.toLocaleString()}</td>
+    <td class="MuNumber px-0 has-text-right pr-4">{Water.toLocaleString()}</td>
+    <td class="MuNumber px-0 has-text-right pr-4">{Electric.toLocaleString()}</td>
+    <td class="MuNumber px-0 has-text-right pr-4">{Gas.toLocaleString()}</td>
+    <td class="MuNumber px-0 has-text-right pr-4">{Mobile.toLocaleString()}</td>
+    <td class="MuNumber px-0 has-text-right pr-4">{Line.toLocaleString()}</td>
+    <td class="MuNumber px-0 has-text-right pr-4">{Tax.toLocaleString()}</td>
     <td
       ><button
         id={"edit" + Value.Month}

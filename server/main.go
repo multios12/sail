@@ -41,8 +41,8 @@ func init() {
 
 func main() {
 	router := gin.Default()
+	router.GET("/", getStatic)
 	router.GET("/index.html", getStatic)
-	router.GET("/assets/:file", getStatic)
 	router.GET("/favicon.ico", getStatic)
 	balance.Initial(router, dataPath, password)
 	memo.Initial(router, dataPath)
@@ -53,7 +53,8 @@ func main() {
 
 // スタティックリソース GET API
 func getStatic(c *gin.Context) {
-	c.FileFromFS("static"+c.Request.URL.Path, http.FS(static))
+	p := "static" + c.Request.URL.Path
+	c.FileFromFS(p, http.FS(static))
 }
 
 func validateArgs() error {

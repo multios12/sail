@@ -93,13 +93,14 @@ func postBalanceMonth(c *gin.Context) {
 	if err != nil {
 		c.Status(http.StatusInternalServerError)
 	}
+	target.CostHousing = body.CostHousing
 	target.CostWater = body.CostWater
 	target.CostElectric = body.CostElectric
 	target.CostGas = body.CostGas
 	target.CostMobile = body.CostMobile
 	target.CostLine = body.CostLine
 	target.CostTax = body.CostTax
-	target.Cost = body.CostWater + body.CostElectric + body.CostGas + body.CostMobile + body.CostLine + body.CostTax
+	target.Cost = body.CostHousing + body.CostWater + body.CostElectric + body.CostGas + body.CostMobile + body.CostLine + body.CostTax
 	target.Saving = body.Saving
 	target.Memo = body.Memo
 

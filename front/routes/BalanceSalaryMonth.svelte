@@ -117,7 +117,7 @@
     </table>
     {#each model.Images as i}
       <img
-        src={`../../api/salary/${params.year}/${params.month}/images/${i}`}
+        src={`./api/salary/${params.year}/${params.month}/images/${i}`}
         alt="salary"
       />
     {/each}

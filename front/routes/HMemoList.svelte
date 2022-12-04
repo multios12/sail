@@ -25,8 +25,10 @@
       <tbody>
         {#each memos as m}
           <tr>
-            <td on:click={() => showEdit(m.Id)}>{m.Date}&nbsp;{m.Name}</td>
-            <td on:click={() => showEdit(m.Id)}>{m.Shop}</td>
+            <td on:click={() => showEdit(m.Id)}
+              on:keypress={() => showEdit(m.Id)}>{m.Date}&nbsp;{m.Name}</td>
+            <td on:click={() => showEdit(m.Id)}
+              on:keypress={() => showEdit(m.Id)}>{m.Shop}</td>
           </tr>
         {/each}
       </tbody>
