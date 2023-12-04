@@ -4,10 +4,10 @@
 name: sail CI
 
 on:
-  push:
-    branches: [ "main" ]
   pull_request:
-    branches: [ "main" ]
+    types: [closed]
+    branches:
+      - release
 
 jobs:
   build:
