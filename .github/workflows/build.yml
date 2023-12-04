@@ -44,7 +44,7 @@ jobs:
     # create Release
     - name: Create Release
       id: create_release
-      uses: actions/create-release@v1
+      uses: actions/create-release@v1.1.4
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
@@ -53,3 +53,13 @@ jobs:
         body: ${{ github.event.pull_request.body }}
         draft: true
         prerelease: false
+    - name: Upload Release Asset
+      id: upload-release-asset
+      uses: actions/upload-release-asset@v1.0.2
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./release_target.txt
+        asset_name: release_target.txt
+        asset_content_type: text/plain
