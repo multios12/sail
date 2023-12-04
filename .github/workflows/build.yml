@@ -28,5 +28,7 @@ jobs:
         cache-dependency-path: ./front/yarn.lock  
     - name: yarn build
       working-directory: front
-      run: yarn build
+      run: |
+        yarn
+        yarn build
     - uses: actions/setup-go@v3
