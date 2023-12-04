@@ -25,6 +25,5 @@ jobs:
       with:
         node-version: ${{ matrix.node-version }}
         cache: 'npm'
-        working-directory: ./front
     - run: yarn --cwd ./front build
     - uses: actions/setup-go@v3
