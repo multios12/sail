@@ -17,6 +17,8 @@ jobs:
         node-version: [18]
     steps:
     - uses: actions/checkout@v3
+
+    # build node.js
     - name: Use Node.js ${{ matrix.node-version }}
       uses: actions/setup-node@v3
       with:
@@ -30,9 +32,24 @@ jobs:
         cp ./front/dist/* ./server/static/ -R
       env:
         HTML: index.html
+
+    # build go
     - uses: actions/setup-go@v3
     - run: go build -ldflags="-s -w" -trimpath -o ../dist/
       working-directory: server
       env:
         GOOS: linux
         GOARCH: amd64
+
+    # create Release
+    - name: Create Release
+      id: create_release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: ${{ github.event.pull_request.title }}
+        release_name: ${{ github.event.pull_request.title }}
+        body: ${{ github.event.pull_request.body }}
+        draft: true
+        prerelease: false
