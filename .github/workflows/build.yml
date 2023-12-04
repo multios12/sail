@@ -29,7 +29,8 @@ jobs:
     - name: yarn build
       working-directory: front
       run: |
-        mkdir dist
         yarn
         yarn build
+      env:
+        HTML: index.html
     - uses: actions/setup-go@v3
