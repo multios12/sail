@@ -27,10 +27,15 @@ jobs:
         cache: 'yarn'
         cache-dependency-path: ./front/yarn.lock  
     - name: yarn build
-      working-directory: front
       run: |
-        yarn
-        yarn build
+        yarn --cwd ./front
+        yarn --cwd ./front build
+        cp ./front/dist/* ./server/static/ -R
       env:
         HTML: index.html
     - uses: actions/setup-go@v3
+    - run: go build -ldflags="-s -w" -trimpath -o ../dist/
+      working-directory: server
+      env:
+        GOOS: linux
+        GOARCH: amd64
