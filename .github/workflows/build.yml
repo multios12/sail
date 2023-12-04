@@ -24,6 +24,9 @@ jobs:
       uses: actions/setup-node@v3
       with:
         node-version: ${{ matrix.node-version }}
-        cache: 'npm'
-    - run: yarn --cwd ./front build
+        cache: 'yarn'
+        cache-dependency-path: ./front/yarn.lock  
+    - name: yarn build
+      working-directory: front
+      run: yarn build
     - uses: actions/setup-go@v3
