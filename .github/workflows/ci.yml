@@ -5,9 +5,10 @@ name: ci
 
 on:
   pull_request:
-    types: [closed]
-    branches:
-      - release
+  push:
+
+permissions:
+  contents: write
 
 jobs:
   build:
