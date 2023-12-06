@@ -24,3 +24,7 @@ Vscode上でCTRL+SHIFT+P押下、[Reopen in Container]選択で開発環境の�
 > cd srv
 > go mod init github.com/multios12/sail
 > go get "github.com/glebarez/sqlite" "gorm.io/gorm"
+
+### goreleaserのインストール
+>  wget https://github.com/goreleaser/goreleaser/releases/download/v1.22.1/goreleaser_1.22.1_x86_64.apk
+>  apk add --allow-untrusted --no-network --repositories-file=repo.list goreleaser_1.22.1_x86_64.apk
