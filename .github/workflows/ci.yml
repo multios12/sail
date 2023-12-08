@@ -37,7 +37,6 @@ jobs:
         uses: goreleaser/goreleaser-action@v5
         with:
           args: release --clean
-          workdir: server
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Upload assets
