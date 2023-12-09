@@ -1,10 +1,10 @@
 import { defineConfig, Plugin } from 'vite'
-import { OutputChunk, OutputAsset, OutputOptions } from "rollup"
+import { OutputChunk, OutputAsset } from "rollup"
 import { svelte } from '@sveltejs/vite-plugin-svelte'
 import { PurgeCSS, UserDefinedOptions } from "purgecss";
 
 export default defineConfig(() => {
-  const html = process.env.HTML || "sail.html"
+  const html = process.env.HTML || "index.html"
   return {
     plugins: [svelte(), purgeCssPlugin(), singleFilePlugin()],
     build: {

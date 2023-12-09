@@ -1,7 +1,5 @@
 {
   "name": "sail",
-  "private": true,
-  "version": "0.6.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -12,6 +10,7 @@
   "devDependencies": {
     "@sveltejs/vite-plugin-svelte": "^1.4.0",
     "@tsconfig/svelte": "^3.0.0",
+    "@types/node": "18.0.0",
     "bulma": "^0.9.4",
     "purgecss": "^5.0.0",
     "svelte": "^3.53.1",
