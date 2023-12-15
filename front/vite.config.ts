@@ -1,10 +1,10 @@
 import { defineConfig, Plugin } from 'vite'
-import { OutputChunk, OutputAsset, OutputOptions } from "rollup"
+import { OutputChunk, OutputAsset } from "rollup"
 import { svelte } from '@sveltejs/vite-plugin-svelte'
 import { PurgeCSS, UserDefinedOptions } from "purgecss";
 
 export default defineConfig(() => {
-  const html = process.env.HTML || "sail.html"
+  const html = process.env.HTML || "index.html"
   return {
     plugins: [svelte(), purgeCssPlugin(), singleFilePlugin()],
     build: {
@@ -95,7 +95,7 @@ function singleFilePlugin(): Plugin {
       const cssNames = Object.keys(bundle).filter(key => re.test(key));
 
       for (const css of cssNames) {
-        const target = `<link rel="stylesheet" href="./${css}">`
+        const target = `<link rel="stylesheet" crossorigin href="./${css}">`
         re = new RegExp(target)
         if (re.test(body)) {
           const replaced = `<style type="text/css">\n${(bundle[css] as any).source}\n</style>`

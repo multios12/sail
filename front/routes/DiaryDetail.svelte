@@ -2,13 +2,13 @@
   import { createEventDispatcher, onMount } from "svelte";
   import { location, pop, push } from "svelte-spa-router";
   import TagsInput from "../components/TagsInput.svelte";
-  import type { detailType } from "../models/diaryModels";
-  export let params = {};
+  import type { detailType } from "../models/diaryModels.js";
+  export let params = new Map<string, string>();
   let editDay: string | null;
   const dispatch = createEventDispatcher();
   let Outline = "";
   let Detail = "";
-  let Tags = [];
+  let Tags : string[] = [];
   let isDayEdit: boolean;
 
   onMount(async () => {
@@ -19,14 +19,21 @@
       editDay += ("00" + (dt.getMonth() + 1)).slice(-2);
       editDay += `-${("00" + dt.getDate()).slice(-2)}`;
     } else {
+      if (params == undefined) {
+        return;
+      }
       isDayEdit = false;
-      let url = params["id"].replaceAll("-", "/");
+      let id = params.get("id");
+      if (id == undefined) {
+        return;
+      }
+      let url = id.replaceAll("-", "/");
       url = `./api/diary/${url}`;
       fetch(url, { method: "get" })
         .then((r) => r.json())
         .then((r) => {
           const s = r as detailType;
-          editDay = params["id"];
+          editDay = <string | null>id;
           Outline = s.Outline;
           Detail = s.Detail;
           Tags = s.Tags;
@@ -56,6 +63,9 @@
 
   /** 削除 クリックイベント */
   const deleteClick = async () => {
+    if (editDay == null) {
+      return;
+    }
     let url = editDay.replaceAll("-", "/");
     url = `./api/diary/${url}`;
     await fetch(url, { method: "delete" });

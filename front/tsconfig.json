@@ -3,9 +3,11 @@
   "compilerOptions": {
     "target": "esnext",
     "useDefineForClassFields": true,
-    "module": "esnext",
-    "resolveJsonModule": true,
+    "verbatimModuleSyntax": true,
+    "module": "ESNext",
+    "moduleResolution": "Classic",
     "importsNotUsedAsValues": "remove",
+    "resolvePackageJsonImports": false,
     "baseUrl": ".",
     /**
      * Typecheck JS in `.svelte` and `.js` files by default.

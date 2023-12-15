@@ -1,12 +1,12 @@
 <script lang="ts">
   import { push } from "svelte-spa-router";
-  import type { listType } from "../models/diaryModels";
+  import type { listType } from "../models/diaryModels.js";
   export let selectMonth: string | null = `${new Date().getFullYear()}-${(
     "00" +
     (new Date().getMonth() + 1)
   ).slice(-2)}`;
   export const showList = () => {
-    let url = selectMonth.replace("-", "/");
+    let url = selectMonth !== null ? selectMonth.replace("-", "/") : null;
     url = `./api/diary/${url}`;
     fetch(url)
       .then((r) => r.json())
@@ -28,7 +28,7 @@
   const listClick = async (e: any, l: string) => push("/d/" + l);
 
   $: {
-    let url = selectMonth.replace("-", "/");
+    let url = selectMonth !== null ? selectMonth.replace("-", "/") : null;
     url = `./api/diary/${url}`;
     fetch(url)
       .then((r) => r.json())

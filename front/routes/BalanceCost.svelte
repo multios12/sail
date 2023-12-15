@@ -1,10 +1,10 @@
 <script lang="ts">
-  import type { BalanceYear } from "../../diary/models/balanceModels";
+  import type { BalanceYear } from "../models/balanceModels.js";
   import MuCostYearMonthTr from "../components/BalanceCostMonthTr.svelte";
   import { link } from "svelte-spa-router";
   import BalanceTabs from "../components/BalanceTabs.svelte";
 
-  export let params: { year: string } = { year: undefined };
+  export let params: { year: string | undefined } = { year: undefined };
   $: {
     let url = `./api/balance/${params.year || new Date().getFullYear()}`;
     fetch(url)

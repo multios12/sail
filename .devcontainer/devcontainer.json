@@ -4,17 +4,21 @@
         "context": "../",
         "dockerfile": "Dockerfile"
     },
-    "settings": {
-        "editor.codeActionsOnSave": {
-            "source.fixAll.eslint": true // ファイル保存時にESLintでフォーマット
+    "customizations": {
+        "vscode": {
+            "settings": {
+                "editor.codeActionsOnSave": {
+                    "source.fixAll.eslint": true // ファイル保存時にESLintでフォーマット
+                }
+            },
+            "extensions": [
+                "golang.go",
+                "reliutg.bulma-css-class-completion",
+                "dbaeumer.vscode-eslint",
+                "svelte.svelte-vscode"
+            ],
         }
     },
-    "extensions": [
-        "golang.go",
-        "reliutg.bulma-css-class-completion",
-        "dbaeumer.vscode-eslint",
-        "svelte.svelte-vscode"
-    ],
     "forwardPorts": [
         3000
     ],

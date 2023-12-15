@@ -1,9 +1,9 @@
 <script lang="ts">
-  import type { SalaryMonthModel } from "../../diary/models/balanceModels";
+  import type { SalaryMonthModel } from "../models/balanceModels.js";
   import { onMount } from "svelte";
   import BalanceTabs from "../components/BalanceTabs.svelte";
 
-  export let params: { year: string; month: string } = {
+  export let params: { year: string | undefined; month: string | undefined} = {
     year: undefined,
     month: undefined,
   };

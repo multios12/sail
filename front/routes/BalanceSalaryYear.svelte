@@ -1,9 +1,10 @@
 <script lang="ts">
-  import type { SalaryModel } from "../../diary/models/balanceModels";
+  import type { SalaryModel } from "../models/balanceModels.js";
+
   import { link } from "svelte-spa-router";
   import BalanceTabs from "../components/BalanceTabs.svelte";
 
-  export let params: { year: string } = { year: undefined };
+  export let params: { year: string | undefined } = { year: undefined };
   $: {
     params.year = params.year || String(new Date().getFullYear());
 
