@@ -1,4 +1,4 @@
-package balance
+package converter
 
 import (
 	"errors"
@@ -13,7 +13,7 @@ import (
 )
 
 // コンテキスト
-func Convert(dataPath string) error {
+func Convert(dataPath string, pdfPassword string) error {
 	pdfPath := path.Join(dataPath, "_pdf")
 	files, err := ioutil.ReadDir(pdfPath)
 	if err != nil {
@@ -22,13 +22,14 @@ func Convert(dataPath string) error {
 
 	for _, file := range files {
 		filename := path.Join(pdfPath, file.Name())
-		createData(dataPath, filename)
+		CreateData(dataPath, filename, pdfPassword)
 	}
 
 	return nil
 }
 
-func createData(dataPath string, filename string) error {
+// 指定された給与明細・経費明細PDFファイルから、データを抽出する
+func CreateData(dataPath string, filename string, pdfPassword string) error {
 	ext := path.Ext(filename)
 	if ext != ".pdf" {
 		return errors.New("給与明細・経費明細のPDFファイルを選択して下さい")
@@ -37,16 +38,16 @@ func createData(dataPath string, filename string) error {
 	regexp := regexp.MustCompile(`(\d+)年(\d+)月(給与|.*賞与|経費)_.+`)
 	if regexp.MatchString(filename) {
 		println(filename)
-		pages, err := pdfinfo(filename)
+		pages, err := pdfinfo(filename, pdfPassword)
 		if err != nil {
 			return fmt.Errorf("給与明細PDFファイルが読み込めません。パスワードを確認してください。: %w", err)
 		}
 
 		s := regexp.ReplaceAllString(filename, "$3")
 		if !strings.Contains(s, "経費") {
-			return createSalaryData(dataPath, filename, filename, pages)
+			return ConvertSalary(dataPath, filename, filename, pages, pdfPassword)
 		} else {
-			return createExpenseData(dataPath, filename, filename, pages)
+			return ConvertExpense(dataPath, filename, filename, pages, pdfPassword)
 		}
 	}
 	return errors.New("給与明細・経費明細のPDFファイルを選択して下さい")
@@ -55,7 +56,7 @@ func createData(dataPath string, filename string) error {
 // ----------------------------------------------------------------------------
 
 // pdftotextコマンドを実行し、テキストデータを出力する
-func pdftotext(src string, dist string, opt string) {
+func pdftotext(src string, dist string, opt string, pdfPassword string) {
 	opt = src + " " + dist + " -opw " + pdfPassword + " " + opt
 	args := strings.Split(opt, " ")
 
@@ -72,7 +73,7 @@ func pdftotext(src string, dist string, opt string) {
 }
 
 // pdfinfoコマンドを実行し、ページ数を返す
-func pdfinfo(filename string) (string, error) {
+func pdfinfo(filename string, pdfPassword string) (string, error) {
 	command := "pdfinfo"
 
 	b, err := exec.Command(command, filename, "-opw", pdfPassword).Output()

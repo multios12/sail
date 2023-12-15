@@ -14,6 +14,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/multios12/sail/balance/converter"
 )
 
 var balancePath string // データディレクトリ
@@ -183,7 +184,7 @@ func putSalaryMonth(c *gin.Context) {
 	}
 
 	// PDFファイルの変換とデータ再読み込み
-	Convert(balancePath)
+	converter.Convert(balancePath, pdfPassword)
 	var err error
 	Salaries, err = readAllData()
 	if err != nil {
@@ -229,7 +230,7 @@ func postFiles(c *gin.Context) {
 	}
 	outFile.Close()
 
-	err = createData(balancePath, filename)
+	err = converter.CreateData(balancePath, filename, pdfPassword)
 	if err != nil {
 		c.String(http.StatusInternalServerError, err.Error())
 		return

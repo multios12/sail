@@ -1,4 +1,5 @@
 <script lang="ts">
+  import "bulma/css/bulma.css";
   import Router, { location, link } from "svelte-spa-router";
   import Home from "./routes/BalanceHome.svelte";
   import SalaryYear from "./routes/BalanceSalaryYear.svelte";
@@ -60,5 +61,4 @@
 </main>
 
 <style>
-  @import url("bulma/css/bulma.css");
 </style>

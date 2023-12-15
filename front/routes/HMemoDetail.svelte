@@ -1,16 +1,7 @@
 <script lang="ts">
   import { pop, push } from "svelte-spa-router";
+  import type { memoType } from "../models/memoModels.js";
   import { onMount } from "svelte";
-
-  type memoType = {
-    Id: string | undefined;
-    Name: string;
-    Shop: string;
-    Page: string;
-    Date: string;
-    Play: string;
-    Talk: string;
-  };
 
   const m: memoType = {
     Id: undefined,
@@ -22,7 +13,7 @@
     Talk: "",
   };
 
-  export let params: { id: string } = { id: undefined };
+  export let params: { id: string | undefined } = { id: undefined };
   let memo = m;
   let isErr = false;
   let errMessage = "";

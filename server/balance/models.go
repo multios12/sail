@@ -4,7 +4,7 @@ import (
 	"time"
 )
 
-//　バランスシート(年単位集計)モデル
+// バランスシート(年単位集計)モデル
 type BalanceYear struct {
 	Year        string    // 年
 	EnableYears []string  // 利用可能な年のリスト
@@ -35,6 +35,7 @@ type Balance struct {
 }
 
 // ----------------------------------------------------------------------------
+
 // 給与支給明細書（年単位集計）モデル
 type SalaryYear struct {
 	Year        string       // 年

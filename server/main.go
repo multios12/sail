@@ -40,6 +40,10 @@ func init() {
 }
 
 func main() {
+	if f, err := os.Stat(dataPath); os.IsNotExist(err) || !f.IsDir() {
+		os.Mkdir(dataPath, os.ModeDir)
+	}
+
 	router := gin.Default()
 	router.GET("/", getStatic)
 	router.GET("/index.html", getStatic)

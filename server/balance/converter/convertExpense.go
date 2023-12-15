@@ -1,4 +1,4 @@
-package balance
+package converter
 
 import (
 	"os"
@@ -10,7 +10,7 @@ import (
 
 // ----------------------------------------------------------------------------
 // 経費等支給明細書データ作成
-func createExpenseData(dataPath string, filename string, src string, pages string) error {
+func ConvertExpense(dataPath string, filename string, src string, pages string, pdfPassword string) error {
 
 	r := regexp.MustCompile(`(\d+)年(\d+)月(経費)_.+`)
 
@@ -31,8 +31,8 @@ func createExpenseData(dataPath string, filename string, src string, pages strin
 	dist = filepath.Join(monthPath, "expense")
 	exec.Command("pdftocairo", src, dist, "-opw", pdfPassword, "-png").Output()
 
-	pdftotext(src, filepath.Join(monthPath, "expense01.txt"), "-x 300 -y 140 -W 300 -H 40")
-	pdftotext(src, filepath.Join(monthPath, "expense01.txt"), "-x 100 -y 210 -W 800 -H 40")
-	pdftotext(src, filepath.Join(monthPath, "expense01.txt"), "-x 100 -y 250 -W 800 -H 40")
+	pdftotext(src, filepath.Join(monthPath, "expense01.txt"), "-x 300 -y 140 -W 300 -H 40", pdfPassword)
+	pdftotext(src, filepath.Join(monthPath, "expense01.txt"), "-x 100 -y 210 -W 800 -H 40", pdfPassword)
+	pdftotext(src, filepath.Join(monthPath, "expense01.txt"), "-x 100 -y 250 -W 800 -H 40", pdfPassword)
 	return nil
 }
