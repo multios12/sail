@@ -16,12 +16,12 @@ version: 1
     #- go generate ./...
 
 builds:
-  - dir: ./server
+  - dir: ./cmd/sail
     env:
     - CGO_ENABLED=0
     goos:
       - linux
-      - windows
+      #- windows
       #- darwin
     goarch:
       #- 386
@@ -29,7 +29,7 @@ builds:
     hooks:
       pre: 
         - cmd: go mod tidy
-          dir: ./server
+          dir: .
 
 archives:
   - format: tar.gz
