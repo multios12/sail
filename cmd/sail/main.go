@@ -11,9 +11,9 @@ import (
 	"path/filepath"
 
 	"github.com/gin-gonic/gin"
-	"github.com/multios12/sail/balance"
-	"github.com/multios12/sail/diary"
-	"github.com/multios12/sail/memo"
+	"github.com/multios12/sail/pkg/balance"
+	"github.com/multios12/sail/pkg/diary"
+	"github.com/multios12/sail/pkg/memo"
 )
 
 var dataPath string // データディレクトリ

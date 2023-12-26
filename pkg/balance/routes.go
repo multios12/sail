@@ -14,7 +14,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/multios12/sail/balance/converter"
+	"github.com/multios12/sail/pkg/balance/converter"
 )
 
 var balancePath string // データディレクトリ
