@@ -34,7 +34,7 @@ jobs:
       # install webp library
       - name: Init go
         run: |
-          sudo apt-get install webp
+          sudo apt-get install webp libwebp
       # release
       - name: Run GoReleaser
         uses: goreleaser/goreleaser-action@v5
