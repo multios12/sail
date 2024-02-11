@@ -4,9 +4,11 @@
 /front/dist
 /front/node_modules
 /front/package-lock.json
-/server/__debug_bin
-/server/__debug_bin.exe
-/server/static/static
-/server/static/*.html
-/server/static/favicon.ico
-/server/static/asset-manifest.json
+/sail
+/cmd/sail/__debug_bin*
+/__debug_bin
+/__debug_bin.exe
+/static/static
+/cmd/sail/static/*.html
+/cmd/sail/static/favicon.ico
+/cmd/sail/static/asset-manifest.json

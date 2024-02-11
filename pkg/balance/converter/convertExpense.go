@@ -1,38 +1,50 @@
 package converter
 
 import (
-	"os"
-	"os/exec"
+	"encoding/json"
+	"errors"
+	"fmt"
 	"path"
-	"path/filepath"
 	"regexp"
 )
 
-// ----------------------------------------------------------------------------
-// 経費等支給明細書データ作成
-func ConvertExpense(dataPath string, filename string, src string, pages string, pdfPassword string) error {
-
-	r := regexp.MustCompile(`(\d+)年(\d+)月(経費)_.+`)
+// 指定されたPDFファイルから、経費明細データ・画像を作成する
+func ConvertExpenseDetail(filename string, pdfPassword string) ([]byte, []byte, error) {
+	r := regexp.MustCompile(`(\d+)年(\d+)月(経費)_.+\.pdf`)
+	if !r.MatchString(filename) {
+		return nil, nil, errors.New("給与明細・経費明細のPDFファイルを選択して下さい")
+	}
 
 	month := path.Base(filename)
 	month = r.ReplaceAllString(month, "$1$2")
-	if len(month) == 5 {
-		month = month[:4] + "0" + month[4:]
+	pages, err := pdfinfo(filename, pdfPassword)
+	if err != nil {
+		return nil, nil, fmt.Errorf("給与明細PDFファイルが読み込めません。パスワードを確認してください。: %w", err)
 	}
 
-	monthPath := filepath.Join(dataPath, month)
-	dist := filepath.Join(monthPath, "expense01.txt")
-	if _, err := os.Stat(dist); !os.IsNotExist(err) {
-		return err
+	if data, image, err := readExpensePdf(filename, month, pages, pdfPassword); err != nil {
+		return nil, nil, err
+	} else if e, err := readTextFileToExpenseItem(data["expense01"]); err != nil {
+		return nil, nil, err
+	} else {
+		e.Month = month
+		a, err := json.Marshal(e)
+		return a, image, err
 	}
-	os.Mkdir(monthPath, os.ModePerm)
+}
 
+// ----------------------------------------------------------------------------
+// 経費等支給明細書データ作成
+func readExpensePdf(src string, month string, pages string, pdfPassword string) (map[string]string, []byte, error) {
 	// 画像
-	dist = filepath.Join(monthPath, "expense")
-	exec.Command("pdftocairo", src, dist, "-opw", pdfPassword, "-png").Output()
+	image, err := readImage(src, pdfPassword)
+	if err != nil {
+		return nil, nil, err
+	}
 
-	pdftotext(src, filepath.Join(monthPath, "expense01.txt"), "-x 300 -y 140 -W 300 -H 40", pdfPassword)
-	pdftotext(src, filepath.Join(monthPath, "expense01.txt"), "-x 100 -y 210 -W 800 -H 40", pdfPassword)
-	pdftotext(src, filepath.Join(monthPath, "expense01.txt"), "-x 100 -y 250 -W 800 -H 40", pdfPassword)
-	return nil
+	var data map[string]string = map[string]string{}
+	data["expense01"] = pdftostring(src, "-x 300 -y 140 -W 300 -H 40", pdfPassword)
+	data["expense01"] += pdftostring(src, "-x 100 -y 210 -W 800 -H 40", pdfPassword)
+	data["expense01"] += pdftostring(src, "-x 100 -y 250 -W 800 -H 40", pdfPassword)
+	return data, image, nil
 }

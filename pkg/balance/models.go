@@ -1,7 +1,11 @@
 package balance
 
 import (
+	"encoding/json"
 	"time"
+
+	"github.com/multios12/sail/pkg/balance/converter"
+	"gorm.io/datatypes"
 )
 
 // バランスシート(年単位集計)モデル
@@ -28,52 +32,83 @@ type Balance struct {
 	CostLine     int  `gorm:"default:0;"` // 費用：通信
 	CostTax      int  `gorm:"default:0;"` // 費用：納税
 
-	Saving    int       `gorm:"default:0;"` // 貯蓄額
-	Memo      string    // メモ
+	Saving int    `gorm:"default:0;"` // 貯蓄額
+	Memo   string // メモ
+
 	CreatedAt time.Time // 作成時に値がゼロ値の場合、現在時間がセットされる
 	UpdatedAt time.Time // 更新時、または作成時の値がゼロ値の場合、現在のUNIX秒がセットされる
+}
+
+// 給与明細
+func (b *Balance) SalaryDetail() converter.SalaryDetail {
+	d, _ := findBalanceDetailByMonthType(b.Month, DetailTypeSalary)
+	if len(d.Json) == 0 {
+		return converter.SalaryDetail{}
+	} else {
+		var detail converter.SalaryDetail
+		json.Unmarshal(d.Json, &detail)
+		detail.Images = []string{}
+		detail.Images = append(detail.Images, "1.webp")
+		if len(b.Image(DetailTypeExpense)) > 0 {
+			detail.Images = append(detail.Images, "3.webp")
+		}
+		return detail
+	}
+}
+
+// 賞与明細
+func (b *Balance) BonusDetail() converter.SalaryDetail {
+	d, _ := findBalanceDetailByMonthType(b.Month, DetailTypeBonus)
+	if len(d.Json) == 0 {
+		return converter.SalaryDetail{}
+	} else {
+		var detail converter.SalaryDetail
+		json.Unmarshal(d.Json, &detail)
+		detail.Images = []string{}
+		detail.Images = append(detail.Images, "2.webp")
+		return detail
+	}
+}
+
+// 明細画像
+func (b *Balance) Image(detailType DetailType) []byte {
+	month := b.Month
+	if len(b.Month) > 6 {
+		month = b.Month[:6]
+	}
+	detail, _ := findBalanceDetailByMonthType(month, detailType)
+	return detail.Image
+}
+
+// 明細タイプ
+type DetailType int
+
+const (
+	DetailTypeSalary  DetailType = 1 // 明細タイプ：給与明細
+	DetailTypeBonus   DetailType = 2 // 明細タイプ：賞与明細
+	DetailTypeExpense DetailType = 3 // 明細タイプ：経費明細
+)
+
+// 明細データ
+type BalanceDetail struct {
+	ID    uint           `gorm:"primaryKey" ` // id
+	Month string         // 年月(yyyyMM)
+	Type  DetailType     `gorm:"default:1;"` // 種別
+	Json  datatypes.JSON // JSONデータ
+	Image []byte         // 画像データ
+}
+
+// 給与支給明細のキーデータ
+type KeySalary struct {
+	Month string // 年月(yyyyMM)
 }
 
 // ----------------------------------------------------------------------------
 
 // 給与支給明細書（年単位集計）モデル
 type SalaryYear struct {
-	Year        string       // 年
-	EnableYears []string     // 利用可能な年のリスト
-	Totals      []DetailItem // 合計リスト
-	Details     []Salary     // 月ごとの給与支給明細リスト
-}
-
-// 給与支給明細書モデル
-type Salary struct {
-	Month    string        // 年月
-	Title    string        // タイトル
-	IsError  bool          // 取得エラー
-	Counts   []DetailItem  // 日数配列
-	Times    []TimeItem    // 時間配列
-	Salarys  []DetailItem  // 支給配列
-	Costs    []DetailItem  // 控除配列
-	Totals   []DetailItem  // 合計配列
-	Expense  int           // 経費等支給合計額
-	Expenses []ExpenseItem // 経費内訳配列
-	Images   []string      // 画像ファイル配列
-}
-
-// 詳細項目
-type DetailItem struct {
-	Name  string // 項目名
-	Value int    // 金額
-}
-
-// 時間項目
-type TimeItem struct {
-	Name  string // 項目名
-	Value string // 値
-}
-
-// 経費項目
-type ExpenseItem struct {
-	Name   string // 項目名
-	Amount int    // 金額
-	Memo   string // 備考
+	Year        string                   // 年
+	EnableYears []string                 // 利用可能な年のリスト
+	Totals      []converter.DetailItem   // 合計リスト
+	Details     []converter.SalaryDetail // 月ごとの給与支給明細リスト
 }

@@ -5,7 +5,17 @@
       "type": "npm",
       "label": "npm: dev",
       "script": "dev",
-      "problemMatcher": [],
+      "problemMatcher": {
+        "owner": "custom",
+        "pattern": {
+          "regexp": "^$"
+        },
+        "background": {
+          "activeOnStart": true,
+          "beginsPattern": "Compiling...",
+          "endsPattern": "Compiled .*"
+        }
+      },
       "detail": "vite",
       "isBackground": true,
       "path": "./front"

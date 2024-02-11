@@ -11,6 +11,7 @@ import (
 	"regexp"
 	"sort"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -25,26 +26,29 @@ func Initial(router *gin.Engine, dataPath string, password string) {
 	pdfPassword = password
 	dbOpen(dataPath)
 
-	var err error
-	Salaries, err = readAllData()
+	// PDFファイルのチェック、追加されていれば再読み込み
+	err := readSalaries(balancePath, pdfPassword)
 	if err != nil {
 		println(err)
 		return
 	}
+
 	log.Println("info: balance:salaryPath:" + balancePath)
 	log.Println("info: balance:dbPath    :" + filepath.Join(balancePath, "db"))
-	log.Println("info: balance:data[count:" + strconv.Itoa(len(Salaries)) + "]")
+	//	log.Println("info: balance:data[count:" + strconv.Itoa(countSalary()) + "]")
 
+	// バランスシートAPI
 	router.GET("/api/balance/:year", getBalanceYear)
 	router.GET("/api/balance/:year/:month", getBalanceMonth)
 	router.POST("/api/balance/:year/:month", postBalanceMonth)
 
+	// 給与明細API
 	router.GET("/api/salary/:year", getSalaryYear)
 	router.GET("/api/salary/:year/:month", getSalaryMonth)
 	router.PUT("/api/salary/:year/:month", putSalaryMonth)
+	router.POST("/api/salary/:year/:month", postSalaryMonth)
 	router.GET("/api/salary/:year/:month/images/:file", getSalaryDetailImage)
-
-	router.POST("/api/salary/files", postFiles)
+	router.POST("/api/salary/files", postSalaryFiles)
 }
 
 // バランスシート年単位データ GET API
@@ -116,29 +120,32 @@ func postBalanceMonth(c *gin.Context) {
 	c.Status(http.StatusOK)
 }
 
+// ----------------------------------------------------------------------------
+
 // 給与年単位データ GET API
 func getSalaryYear(c *gin.Context) {
 	y := SalaryYear{Year: c.Param("year")}
+	y.EnableYears = findSalaryYears()
 
-	for _, detail := range Salaries {
-		isEnabled := false
-		for _, e := range y.EnableYears {
-			if e == detail.Month[:4] {
-				isEnabled = true
-			}
-		}
-		if !isEnabled {
-			y.EnableYears = append(y.EnableYears, detail.Month[:4])
-		}
-	}
-
-	for _, detail := range Salaries {
-		if detail.Month[:4] != y.Year {
+	balances, _ := findBalanceByYear(y.Year)
+	for _, balance := range balances {
+		d := balance.SalaryDetail()
+		if len(d.Month) == 0 || d.Month[:4] != y.Year {
 			continue
 		}
+		d.Expense = balance.Expense
+		d.Title = d.Month[:4] + "年" + d.Month[4:] + "月 給与"
+		y.Details = append(y.Details, d)
 
-		y.Details = append(y.Details, detail)
-		for _, total := range detail.Totals {
+		b := balance.BonusDetail()
+		if len(b.Month) > 0 && b.Month[:4] == y.Year {
+			b.Title = b.Month[:4] + "年" + b.Month[4:6] + "月 賞与"
+			y.Details = append(y.Details, b)
+		}
+
+		t := d.Totals
+		t = append(t, b.Totals...)
+		for _, total := range t {
 			exist := false
 			for i, yearTotal := range y.Totals {
 				if total.Name == yearTotal.Name {
@@ -148,7 +155,7 @@ func getSalaryYear(c *gin.Context) {
 				}
 			}
 			if !exist {
-				y.Totals = append(y.Totals, DetailItem{Name: total.Name, Value: total.Value})
+				y.Totals = append(y.Totals, converter.DetailItem{Name: total.Name, Value: total.Value})
 			}
 		}
 	}
@@ -161,13 +168,31 @@ func getSalaryYear(c *gin.Context) {
 // 月単位データ GET API
 func getSalaryMonth(c *gin.Context) {
 	m := c.Param("year") + c.Param("month")
-	for _, v := range Salaries {
-		if v.Month == m {
-			c.JSON(http.StatusOK, v)
+	if strings.Contains(m, "S") {
+		m = m[:6]
+		if s, _ := findBalanceByMonth(m); len(s.Month) > 0 {
+			c.JSON(http.StatusOK, s.BonusDetail())
 			return
 		}
+	} else if s, _ := findBalanceByMonth(m); len(s.Month) > 0 {
+		d := s.SalaryDetail()
+		d.Expense = s.Expense
+		c.JSON(http.StatusOK, s.SalaryDetail())
+		return
 	}
 	c.Status(http.StatusNotFound)
+}
+
+// 月単位データ POST API
+func postSalaryMonth(c *gin.Context) {
+	m := c.Param("year") + c.Param("month")
+	if strings.Contains(m, "S") {
+		m = m[:6]
+	}
+
+	deleteBalanceDetail(m)
+	readSalaries(balancePath, pdfPassword)
+	c.Status(http.StatusOK)
 }
 
 // 給与月単位データ再作成 PUT API
@@ -184,19 +209,10 @@ func putSalaryMonth(c *gin.Context) {
 	}
 
 	// PDFファイルの変換とデータ再読み込み
-	converter.Convert(balancePath, pdfPassword)
-	var err error
-	Salaries, err = readAllData()
-	if err != nil {
-		c.Status(http.StatusInternalServerError)
-	}
-	updateBalanceFromSalaries(m[:6], Salaries)
-
-	for _, v := range Salaries {
-		if v.Month == m {
-			c.JSON(http.StatusOK, v)
-			return
-		}
+	readSalary(balancePath, pdfPassword)
+	if s, _ := findBalanceByMonth(m); len(s.Month) > 0 {
+		c.JSON(http.StatusOK, s.SalaryDetail())
+		return
 	}
 	c.Status(http.StatusNotFound)
 }
@@ -204,12 +220,17 @@ func putSalaryMonth(c *gin.Context) {
 // 月単位画像 GET API
 func getSalaryDetailImage(c *gin.Context) {
 	m := c.Param("year") + c.Param("month")
-	filename := filepath.Join(balancePath, m, c.Param("file"))
-	c.File(filename)
+	if b, _ := findBalanceByMonth(m); len(b.Month) > 0 {
+		filename := c.Param("file")
+		i, _ := strconv.Atoi(filename[:1])
+		c.Data(http.StatusOK, "image/webp", b.Image(DetailType(i)))
+		return
+	}
+	c.Status(http.StatusNotFound)
 }
 
-// ファイル保存 POST API
-func postFiles(c *gin.Context) {
+// 給与ファイル保存 POST API
+func postSalaryFiles(c *gin.Context) {
 	inFile, header, err := c.Request.FormFile("file")
 	if err != nil {
 		return
@@ -230,15 +251,6 @@ func postFiles(c *gin.Context) {
 	}
 	outFile.Close()
 
-	err = converter.CreateData(balancePath, filename, pdfPassword)
-	if err != nil {
-		c.String(http.StatusInternalServerError, err.Error())
-		return
-	}
-	Salaries, err = readAllData()
-	if err != nil {
-		c.String(http.StatusInternalServerError, err.Error())
-		return
-	}
+	readSalary(filename, pdfPassword)
 	c.Status(http.StatusOK)
 }
