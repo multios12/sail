@@ -28,7 +28,7 @@ jobs:
         run: |
           yarn --cwd ./front
           yarn --cwd ./front build
-          cp ./front/dist/* ./server/static/ -R
+          cp ./front/dist/* ./cmd/sail/static/ -R
         env:
           HTML: index.html
 
