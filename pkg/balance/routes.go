@@ -223,7 +223,7 @@ func getSalaryDetailImage(c *gin.Context) {
 	if b, _ := findBalanceByMonth(m); len(b.Month) > 0 {
 		filename := c.Param("file")
 		i, _ := strconv.Atoi(filename[:1])
-		c.Data(http.StatusOK, "image/webp", b.Image(DetailType(i)))
+		c.Data(http.StatusOK, "image/png", b.Image(DetailType(i)))
 		return
 	}
 	c.Status(http.StatusNotFound)

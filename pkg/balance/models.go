@@ -48,9 +48,9 @@ func (b *Balance) SalaryDetail() converter.SalaryDetail {
 		var detail converter.SalaryDetail
 		json.Unmarshal(d.Json, &detail)
 		detail.Images = []string{}
-		detail.Images = append(detail.Images, "1.webp")
+		detail.Images = append(detail.Images, "1.png")
 		if len(b.Image(DetailTypeExpense)) > 0 {
-			detail.Images = append(detail.Images, "3.webp")
+			detail.Images = append(detail.Images, "3.png")
 		}
 		return detail
 	}
@@ -65,7 +65,7 @@ func (b *Balance) BonusDetail() converter.SalaryDetail {
 		var detail converter.SalaryDetail
 		json.Unmarshal(d.Json, &detail)
 		detail.Images = []string{}
-		detail.Images = append(detail.Images, "2.webp")
+		detail.Images = append(detail.Images, "2.png")
 		return detail
 	}
 }
