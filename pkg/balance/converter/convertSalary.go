@@ -1,18 +1,14 @@
 package converter
 
 import (
-	"bytes"
 	"encoding/json"
 	"errors"
 	"fmt"
-	"image/png"
 	"os/exec"
 	"path"
 	"regexp"
 	"strconv"
 	"strings"
-
-	"github.com/harukasan/go-libwebp/webp"
 )
 
 // 指定されたPDFファイルから、給与・賞与明細データ・画像を作成する
@@ -171,17 +167,10 @@ func readSalaryFrom202005S(src string, data map[string]string, pdfPassword strin
 }
 
 func readImage(filename string, pdfPassword string) ([]byte, error) {
-	var webpBuffer bytes.Buffer
 	b, err := exec.Command("pdftocairo", filename, "-", "-opw", pdfPassword, "-singlefile", "-png").Output()
 	if err != nil {
 		return nil, err
-	} else if pngImage, err := png.Decode(bytes.NewReader(b)); err != nil {
-		return nil, err
-	} else if con, err := webp.ConfigPreset(webp.PresetDefault, 45); err != nil {
-		return nil, err
-	} else if err = webp.EncodeRGBA(&webpBuffer, pngImage, con); err != nil {
-		return nil, err
 	}
 
-	return webpBuffer.Bytes(), nil
+	return b, nil
 }
