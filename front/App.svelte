@@ -4,7 +4,7 @@
   import Home from "./routes/Home/Home.svelte";
   import SalaryYear from "./routes/BalanceSalaryYear.svelte";
   import SalaryMonth from "./routes/BalanceSalaryMonth.svelte";
-  import CostYear from "./routes/Cost/index.svelte";
+  import CostYear from "./routes/Cost/Cost.svelte";
   import BalanceUploadButton from "./components/BalanceUploadButton.svelte";
   let page = "";
 
