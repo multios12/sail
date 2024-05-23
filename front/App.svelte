@@ -1,35 +1,26 @@
 <script lang="ts">
   import "bulma/css/bulma.css";
   import Router, { location, link } from "svelte-spa-router";
-  import Home from "./routes/BalanceHome.svelte";
+  import Home from "./routes/Home/Home.svelte";
   import SalaryYear from "./routes/BalanceSalaryYear.svelte";
   import SalaryMonth from "./routes/BalanceSalaryMonth.svelte";
-  import CostYear from "./routes/BalanceCost.svelte";
-  import DiaryList from "./routes/DiaryList.svelte";
-  import DiaryEdit from "./routes/DiaryDetail.svelte";
-  import HMemoList from "./routes/HMemoList.svelte";
-  import HMemoEdit from "./routes/HMemoDetail.svelte";
+  import CostYear from "./routes/Cost/index.svelte";
+  import BalanceUploadButton from "./components/BalanceUploadButton.svelte";
   let page = "";
 
   const routes = {
     "/": Home,
-    "/balance/:year": Home,
-    "/balance/salary/:year": SalaryYear,
-    "/balance/salary/:year/:month": SalaryMonth,
-    "/balance/cost/:year": CostYear,
-    "/d/": DiaryList,
-    "/d/:id": DiaryEdit,
-    "/d/add": DiaryEdit,
-    "/h/": HMemoList,
-    "/h/:id": HMemoEdit,
-    "/h/add": HMemoEdit,
+    "/:year": Home,
+    "/salary/:year": SalaryYear,
+    "/salary/:year/:month": SalaryMonth,
+    "/cost/:year": CostYear,
   };
 
   $: {
-    if ($location.indexOf("/d") >= 0) {
-      page = "d";
-    } else if ($location.indexOf("/h") >= 0) {
-      page = "h";
+    if ($location.indexOf("/s") >= 0) {
+      page = "s";
+    } else if ($location.indexOf("/c") >= 0) {
+      page = "c";
     } else {
       page = "b";
     }
@@ -38,20 +29,23 @@
 
 <nav class="navbar is-dark" aria-label="main navigation">
   <div class="navbar-brand">
-    <a class="navbar-item" href="/" use:link>sail</a>
+    <div class="navbar-item is-unselectable has-text-weight-bold">sail</div>
   </div>
-  <div class="tabs is-boxed">
-    <ul>
-      <li class:is-active={page == "b"}>
-        <a class="navbar-item" href="/" use:link>balance</a>
-      </li>
-      <li class:is-active={page == "d"}>
-        <a class="navbar-item" href="/d/" use:link>diary</a>
-      </li>
-      <li class:is-active={page == "h"}>
-        <a class="navbar-item" href="/h/" use:link>memo</a>
-      </li>
-    </ul>
+  <div class="navbar-item is-tab" class:is-active={page == "b"}>
+    <a href="/" use:link> balance </a>
+  </div>
+  <div class="navbar-item is-tab" class:is-active={page == "s"}>
+    <a href="/salary/{new Date().getFullYear()}" use:link>
+      <i class="material-icons">attach_money</i>salary
+    </a>
+  </div>
+  <div class="navbar-item is-tab" class:is-active={page == "c"}>
+    <a href="/cost/{new Date().getFullYear()}" use:link>
+      <i class="material-icons">payment</i>cost
+    </a>
+  </div>
+  <div class="navbar-item is-tab">
+    <BalanceUploadButton />
   </div>
 </nav>
 <main>

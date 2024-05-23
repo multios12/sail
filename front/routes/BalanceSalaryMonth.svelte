@@ -1,9 +1,8 @@
 <script lang="ts">
   import type { SalaryMonthModel } from "../models/balanceModels.js";
   import { onMount } from "svelte";
-  import BalanceTabs from "../components/BalanceTabs.svelte";
 
-  export let params: { year: string | undefined; month: string | undefined} = {
+  export let params: { year: string | undefined; month: string | undefined } = {
     year: undefined,
     month: undefined,
   };
@@ -43,7 +42,6 @@
   });
 </script>
 
-<BalanceTabs />
 <div class="card px-10">
   <div class="card-header">
     <div class="card-header-title">

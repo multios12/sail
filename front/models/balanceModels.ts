@@ -20,6 +20,7 @@ export type BalanceItem = {
   Cost: number
   /** 固定支出額未入力あり */
   IsNotCost: boolean
+  CostHousing: number
   /** 水道費 */
   CostWater: number
   /** 電気費 */

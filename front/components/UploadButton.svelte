@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { pop, push } from "svelte-spa-router";
+  import { pop } from "svelte-spa-router";
   /** メッセージ */
   let message = "";
 
@@ -30,7 +30,7 @@
         message = "ファイルを保存できませんでした";
       })
       .finally(() =>
-        document.querySelector("#progress")?.classList.add("is-hidden")
+        document.querySelector("#progress")?.classList.add("is-hidden"),
       );
   };
 
@@ -41,7 +41,7 @@
 </script>
 
 <div class="navbar-item field is-grouped">
-  <p class="control nabbar-item ">
+  <p class="control nabbar-item">
     <button class="button is-info" on:click={toggleClick}
       ><span class="material-icons"> file_upload </span>upload</button
     >

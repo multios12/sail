@@ -1,9 +1,8 @@
 <script lang="ts">
-  import type { BalanceYear } from "../../diary/models/balanceModels";
-  import YearCard from "../components/BalanceHomeYearCard.svelte";
-  import BalanceTabs from "../components/BalanceTabs.svelte";
+  import type { BalanceYear } from "../../models/balanceModels";
+  import YearCard from "./YearCard.svelte";
 
-  export let params: { year: string } = { year: undefined };
+  export let params: { year: string | undefined } = { year: undefined };
   $: {
     const url = `./api/balance/${params.year || new Date().getFullYear()}`;
     fetch(url)
@@ -12,13 +11,12 @@
   }
 
   let model: BalanceYear = {
-    Year: undefined,
+    Year: "",
     Balances: [],
     EnableYears: [],
   };
 </script>
 
-<BalanceTabs />
 <div>
   {#each model.EnableYears as year}
     <YearCard {year} {model} />

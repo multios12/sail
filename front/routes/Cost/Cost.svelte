@@ -1,8 +1,7 @@
 <script lang="ts">
-  import type { BalanceYear } from "../models/balanceModels.js";
-  import MuCostYearMonthTr from "../components/BalanceCostMonthTr.svelte";
+  import type { BalanceYear } from "../../models/balanceModels.js";
+  import MuCostYearMonthTr from "./MonthTr.svelte.js";
   import { link } from "svelte-spa-router";
-  import BalanceTabs from "../components/BalanceTabs.svelte";
 
   export let params: { year: string | undefined } = { year: undefined };
   $: {
@@ -21,7 +20,6 @@
   let editMonth = "";
 </script>
 
-<BalanceTabs />
 <div>
   {#each model.EnableYears as y}
     {#if y === model.Year}

@@ -1,1 +1,0 @@
-export type memoType = { Id: string | undefined; Name: string; Shop: string; Page: string; Date: string; Play: string; Talk: string; };

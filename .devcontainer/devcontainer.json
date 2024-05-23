@@ -6,11 +6,12 @@
     },
     "customizations": {
         "vscode": {
-            "settings": {
-                "editor.codeActionsOnSave": {
-                    "source.fixAll.eslint": true // ファイル保存時にESLintでフォーマット
-                }
-            },
+			"settings": {
+				"editor.codeActionsOnSave": {
+					"source.fixAll.eslint": "always" // ファイル保存時にESLintでフォーマット
+				},
+				"editor.formatOnSave": true
+			},
             "extensions": [
                 "golang.go",
                 "reliutg.bulma-css-class-completion",

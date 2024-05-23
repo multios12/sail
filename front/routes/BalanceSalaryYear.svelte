@@ -1,8 +1,6 @@
 <script lang="ts">
   import type { SalaryModel } from "../models/balanceModels.js";
-
   import { link } from "svelte-spa-router";
-  import BalanceTabs from "../components/BalanceTabs.svelte";
 
   export let params: { year: string | undefined } = { year: undefined };
   $: {
@@ -21,7 +19,6 @@
   };
 </script>
 
-<BalanceTabs />
 <div>
   {#each model.EnableYears as year}
     {#if year === model.Year}
@@ -31,12 +28,15 @@
         </div>
         <div class="card-content">
           <nav class="level">
+            <!--
             {#each model.Totals as Value}
               <article class="tile is-child box">
                 <p class="is-size-6">{Value.Name}</p>
                 <p class="is-size-4">{Value.Value.toLocaleString()}</p>
               </article>
             {/each}
+  
+-->
           </nav>
           <table class="table is-striped is-hoverable">
             <thead>
@@ -49,13 +49,15 @@
               </tr>
             </thead>
             <tbody>
+              <!--
+
               {#each model.Details as Value}
                 <tr class={Value.IsError ? "has-background-danger-light" : ""}>
                   <td
                     ><a
                       href="/balance/salary/{Value.Month.substring(
                         0,
-                        4
+                        4,
                       )}/{Value.Month.substring(4)}"
                       use:link>{Value.Title}</a
                     ></td
@@ -84,6 +86,7 @@
                   >
                 </tr>
               {/each}
+              -->
             </tbody>
           </table>
         </div>
