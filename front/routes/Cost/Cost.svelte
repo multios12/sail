@@ -1,6 +1,6 @@
 <script lang="ts">
-  import type { BalanceYear } from "../../models/balanceModels.js";
-  import MuCostYearMonthTr from "./MonthTr.svelte.js";
+  import type { BalanceYear } from "../../models/balanceModels";
+  import MuCostYearMonthTr from "./MonthTr.svelte";
   import { link } from "svelte-spa-router";
 
   export let params: { year: string | undefined } = { year: undefined };

@@ -5,7 +5,7 @@
   import SalaryYear from "./routes/BalanceSalaryYear.svelte";
   import SalaryMonth from "./routes/BalanceSalaryMonth.svelte";
   import CostYear from "./routes/Cost/Cost.svelte";
-  import BalanceUploadButton from "./components/BalanceUploadButton.svelte";
+  import BalanceUploadButton from "./components/UploadButton.svelte";
   let page = "";
 
   const routes = {
