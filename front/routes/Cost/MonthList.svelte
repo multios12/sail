@@ -2,9 +2,10 @@
   import type { BalanceItem } from "../../models/balanceModels";
   import { onMount } from "svelte";
   import EditTd from "../../components/EditTd.svelte";
-  export let Value: BalanceItem;
 
+  export let Value: BalanceItem;
   export let editMonth: string;
+
   let Housing = Value.CostHousing;
   let Water = Value.CostWater;
   let Electric = Value.CostElectric;
@@ -14,6 +15,7 @@
   let Tax = Value.CostTax;
   $: Total = Housing + Water + Electric + Gas + Mobile + Line + Tax;
   $: isEdit = editMonth === Value.Month;
+
   onMount(async () => {
     if (editMonth === "" || isEdit) {
       document

@@ -17,6 +17,12 @@
     Totals: [],
     EnableYears: [],
   };
+  const getSalaryUrl = (month: string) => {
+    return `/salary/${month.substring(0, 4)}/${month.substring(4)}`;
+  };
+  const format = (value: number) => {
+    return value.toLocaleString();
+  };
 </script>
 
 <div>
@@ -28,15 +34,12 @@
         </div>
         <div class="card-content">
           <nav class="level">
-            <!--
             {#each model.Totals as Value}
               <article class="tile is-child box">
                 <p class="is-size-6">{Value.Name}</p>
                 <p class="is-size-4">{Value.Value.toLocaleString()}</p>
               </article>
             {/each}
-  
--->
           </nav>
           <table class="table is-striped is-hoverable">
             <thead>
@@ -49,44 +52,24 @@
               </tr>
             </thead>
             <tbody>
-              <!--
-
               {#each model.Details as Value}
                 <tr class={Value.IsError ? "has-background-danger-light" : ""}>
-                  <td
-                    ><a
-                      href="/balance/salary/{Value.Month.substring(
-                        0,
-                        4,
-                      )}/{Value.Month.substring(4)}"
-                      use:link>{Value.Title}</a
-                    ></td
-                  >
-                  <td
-                    >{Value.Totals
-                      ? Value.Totals[0].Value.toLocaleString()
-                      : 0}</td
-                  >
-                  <td
-                    >{Value.Totals
-                      ? Value.Totals[2].Value.toLocaleString()
-                      : 0}</td
-                  >
-                  <td
-                    >{Value.Month.length === 6
-                      ? Value.Expense.toLocaleString()
-                      : ""}</td
-                  >
-                  <td
-                    >{Value.Month.length === 6
-                      ? Value.Counts
-                        ? Value.Counts[0].Value
-                        : 0
-                      : ""}</td
-                  >
+                  <td>
+                    <a href={getSalaryUrl(Value.Month)} use:link>
+                      {Value.Title}
+                    </a>
+                  </td>
+                  <td>{format(Value.Totals[0].Value)}</td>
+                  <td>{format(Value.Totals[2].Value)}</td>
+                  {#if Value.Month.length === 6}
+                    <td>{Value.Expense.toLocaleString()}</td>
+                    <td>{Value.Counts[0].Value}</td>
+                  {:else}
+                    <td></td>
+                    <td></td>
+                  {/if}
                 </tr>
               {/each}
-              -->
             </tbody>
           </table>
         </div>
@@ -95,7 +78,7 @@
       <div class="card">
         <div class="card-header">
           <div class="card-header-title">
-            <a href="/balance/salary/{year}" use:link>{year}年</a>
+            <a href="/salary/{year}" use:link>{year}年</a>
           </div>
         </div>
       </div>

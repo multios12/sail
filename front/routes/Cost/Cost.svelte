@@ -1,6 +1,6 @@
 <script lang="ts">
   import type { BalanceYear } from "../../models/balanceModels";
-  import MuCostYearMonthTr from "./MonthTr.svelte";
+  import MonthTr from "./MonthList.svelte";
   import { link } from "svelte-spa-router";
 
   export let params: { year: string | undefined } = { year: undefined };
@@ -22,11 +22,17 @@
 
 <div>
   {#each model.EnableYears as y}
-    {#if y === model.Year}
-      <div class="card px-10">
-        <div class="card-header">
-          <div class="card-header-title">{model.Year}年支出</div>
+    <div class="card">
+      <div class="card-header">
+        <div class="card-header-title">
+          {#if y === model.Year}
+            {model.Year}年支出
+          {:else}
+            <a href="/cost/{y}" use:link>{y}年</a>
+          {/if}
         </div>
+      </div>
+      {#if y === model.Year}
         <div class="card-content">
           <table class="table is-striped is-hoverable">
             <thead>
@@ -44,20 +50,12 @@
             </thead>
             <tbody>
               {#each model.Balances as v}
-                <MuCostYearMonthTr Value={v} {editMonth} />
+                <MonthTr Value={v} {editMonth} />
               {/each}
             </tbody>
           </table>
         </div>
-      </div>
-    {:else}
-      <div class="card">
-        <div class="card-header">
-          <div class="card-header-title">
-            <a href="/balance/cost/{y}" use:link>{y}年</a>
-          </div>
-        </div>
-      </div>
-    {/if}
+      {/if}
+    </div>
   {/each}
 </div>

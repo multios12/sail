@@ -47,17 +47,18 @@
     <div class="card-header-title">
       {model.Title}
       <div class="control px-5">
-        <button class="button is-info" on:click={refreshClick}
-          ><span class="material-icons"> refresh </span></button
-        >
+        <button class="button is-info" on:click={refreshClick}>
+          <span class="material-icons"> refresh </span>
+        </button>
       </div>
     </div>
   </div>
+
   <div class="card-content">
     <table class="table is-fullwidth">
       <tbody>
-        <tr class="has-background-success-light">
-          <td>
+        <tr class="has-background-success-dark">
+          <td class="has-text-success">
             <p>支給</p>
             <p>
               {model.Totals && model.Totals.length > 0
@@ -78,8 +79,8 @@
             </div>
           </td>
         </tr>
-        <tr class="has-background-danger-light">
-          <td class="is-one-fifth">
+        <tr class="has-background-danger-dark">
+          <td class="is-one-fifth has-text-danger">
             <p>控除</p>
             <p>
               {model.Totals && model.Totals.length > 0
@@ -100,8 +101,8 @@
             </div>
           </td>
         </tr>
-        <tr class="has-background-info-light">
-          <td class="is-one-fifth">
+        <tr class="has-background-info-dark">
+          <td class="is-one-fifth has-text-info">
             <p>差引</p>
             <p>
               {model.Totals && model.Totals.length > 0

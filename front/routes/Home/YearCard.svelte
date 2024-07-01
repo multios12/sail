@@ -16,7 +16,7 @@
       {#if year === model.Year}
         {model.Year}年
       {:else}
-        <a href="/balance/{year}" use:link>{year}年</a>
+        <a href="/{year}" use:link>{year}年</a>
       {/if}
     </div>
   </div>

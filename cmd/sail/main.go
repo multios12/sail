@@ -12,8 +12,6 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/multios12/sail/pkg/balance"
-	"github.com/multios12/sail/pkg/diary"
-	"github.com/multios12/sail/pkg/memo"
 )
 
 var dataPath string // データディレクトリ
@@ -49,8 +47,6 @@ func main() {
 	router.GET("/index.html", getStatic)
 	router.GET("/favicon.ico", getStatic)
 	balance.Initial(router, dataPath, password)
-	memo.Initial(router, dataPath)
-	diary.Initial(router, dataPath)
 
 	router.Run(port)
 }
