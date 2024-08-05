@@ -1,6 +1,6 @@
 <script lang="ts">
   import type { BalanceYear } from "../../models/balanceModels";
-  import YearCard from "./YearCard.svelte";
+  import YearCard from "./components/YearCard.svelte";
 
   export let params: { year: string | undefined } = { year: undefined };
   $: {

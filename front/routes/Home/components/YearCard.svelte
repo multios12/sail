@@ -1,6 +1,7 @@
 <script lang="ts">
-  import type { BalanceYear } from "../../models/balanceModels";
+  import type { BalanceYear } from "../../../models/balanceModels";
   import HomeMonthTr from "./MonthTr.svelte";
+  import HomeMonthTr2 from "./MonthTr2.svelte";
   import { link } from "svelte-spa-router";
 
   export let year: string;
@@ -21,7 +22,7 @@
     </div>
   </div>
   {#if year === model.Year}
-    <div class="card-content">
+    <div class="card-content is-hidden-mobile">
       <table class="table is-striped is-hoverable">
         <thead>
           <tr>
@@ -41,5 +42,20 @@
         </tbody>
       </table>
     </div>
+    <div class="card-content is-hidden-tablet">
+      <table class="table is-striped is-hoverable">
+        <tbody>
+          {#each model.Balances as balance}
+            <HomeMonthTr2 model={balance} {editMonth} />
+          {/each}
+        </tbody>
+      </table>
+    </div>
   {/if}
 </div>
+
+<style>
+  .table {
+    width: 100%;
+  }
+</style>

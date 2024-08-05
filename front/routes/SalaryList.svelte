@@ -33,7 +33,7 @@
           <div class="card-header-title">{model.Year}年収入</div>
         </div>
         <div class="card-content">
-          <nav class="level">
+          <nav class="level is-hidden-mobile">
             {#each model.Totals as Value}
               <article class="tile is-child box">
                 <p class="is-size-6">{Value.Name}</p>
@@ -41,14 +41,28 @@
               </article>
             {/each}
           </nav>
+          <div class="is-hidden-tablet">
+            <table>
+              <tbody>
+                {#each model.Totals as Value}
+                  <tr>
+                    <td>{Value.Name}&nbsp;</td>
+                    <td class="has-text-right">
+                      {Value.Value.toLocaleString()}
+                    </td>
+                  </tr>
+                {/each}
+              </tbody>
+            </table>
+          </div>
           <table class="table is-striped is-hoverable">
             <thead>
               <tr>
                 <th />
-                <th>支給額</th>
-                <th>差引支給額</th>
-                <th>経費支給額</th>
-                <th>出勤日数</th>
+                <th class="is-hidden-mobile">総支給額</th>
+                <th class="is-hidden-mobile">差引支給額</th>
+                <th class="is-hidden-mobile">経費支給額</th>
+                <th class="is-hidden-mobile">出勤日数</th>
               </tr>
             </thead>
             <tbody>
@@ -58,12 +72,45 @@
                     <a href={getSalaryUrl(Value.Month)} use:link>
                       {Value.Title}
                     </a>
+                    <span class="is-hidden-tablet"
+                      >({format(Value.Counts[0].Value)}日)</span
+                    >
+                    <table class="is-hidden-tablet">
+                      <tbody>
+                        <tr>
+                          <td>支給</td>
+                          <td class="has-text-right"
+                            >{format(Value.Totals[0].Value)}</td
+                          >
+                        </tr>
+                        <tr>
+                          <td>差引</td>
+                          <td class="has-text-right"
+                            >{format(Value.Totals[2].Value)}</td
+                          >
+                        </tr>
+                        {#if Value.Expense != 0}
+                          <tr>
+                            <td>経費</td>
+                            <td class="has-text-right"
+                              >{Value.Expense.toLocaleString()}</td
+                            >
+                          </tr>
+                        {/if}
+                      </tbody>
+                    </table>
                   </td>
-                  <td>{format(Value.Totals[0].Value)}</td>
-                  <td>{format(Value.Totals[2].Value)}</td>
+                  <td class="is-hidden-mobile"
+                    >{format(Value.Totals[0].Value)}
+                  </td>
+                  <td class="is-hidden-mobile"
+                    >{format(Value.Totals[2].Value)}</td
+                  >
                   {#if Value.Month.length === 6}
-                    <td>{Value.Expense.toLocaleString()}</td>
-                    <td>{Value.Counts[0].Value}</td>
+                    <td class="is-hidden-mobile"
+                      >{Value.Expense.toLocaleString()}</td
+                    >
+                    <td class="is-hidden-mobile">{Value.Counts[0].Value}</td>
                   {:else}
                     <td></td>
                     <td></td>

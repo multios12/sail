@@ -1,7 +1,7 @@
 <script lang="ts">
   import { onMount } from "svelte";
-  import type { BalanceItem } from "../../models/balanceModels";
-  import EditTd from "../../components/EditTd.svelte";
+  import type { BalanceItem } from "../../../models/balanceModels";
+  import EditTd from "../../../components/EditTd.svelte";
 
   export let editMonth: String;
   export let model: BalanceItem;
