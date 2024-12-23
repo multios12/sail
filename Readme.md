@@ -29,4 +29,4 @@ Vscode上でCTRL+SHIFT+P押下、[Reopen in Container]選択で開発環境の�
 >  wget https://github.com/goreleaser/goreleaser/releases/download/v1.22.1/goreleaser_1.22.1_x86_64.apk
 >  apk add --allow-untrusted --no-network --repositories-file=repo.list goreleaser_1.22.1_x86_64.apk
 
-git tag -a v0.8.8 -m ''; git push origin --tags
+git tag -a v0.8.10 -m ''; git push origin --tags

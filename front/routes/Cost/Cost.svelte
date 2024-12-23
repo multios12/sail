@@ -37,7 +37,7 @@
           <table class="table is-striped is-hoverable">
             <thead>
               <tr>
-                <th />
+                <th></th>
                 <th>合計</th>
                 <th>住宅</th>
                 <th>水道</th>

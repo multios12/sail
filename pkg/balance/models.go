@@ -5,7 +5,7 @@ import (
 	"time"
 
 	"github.com/multios12/sail/pkg/balance/converter"
-	"gorm.io/datatypes"
+	"github.com/multios12/sail/pkg/balance/models"
 )
 
 // バランスシート(年単位集計)モデル
@@ -41,7 +41,7 @@ type Balance struct {
 
 // 給与明細
 func (b *Balance) SalaryDetail() converter.SalaryDetail {
-	d, _ := findBalanceDetailByMonthType(b.Month, DetailTypeSalary)
+	d, _ := findBalanceDetailByMonthType(b.Month, models.DetailTypeSalary)
 	if len(d.Json) == 0 {
 		return converter.SalaryDetail{}
 	} else {
@@ -49,7 +49,7 @@ func (b *Balance) SalaryDetail() converter.SalaryDetail {
 		json.Unmarshal(d.Json, &detail)
 		detail.Images = []string{}
 		detail.Images = append(detail.Images, "1.png")
-		if len(b.Image(DetailTypeExpense)) > 0 {
+		if len(b.Image(models.DetailTypeExpense)) > 0 {
 			detail.Images = append(detail.Images, "3.png")
 		}
 		return detail
@@ -58,7 +58,7 @@ func (b *Balance) SalaryDetail() converter.SalaryDetail {
 
 // 賞与明細
 func (b *Balance) BonusDetail() converter.SalaryDetail {
-	d, _ := findBalanceDetailByMonthType(b.Month, DetailTypeBonus)
+	d, _ := findBalanceDetailByMonthType(b.Month, models.DetailTypeBonus)
 	if len(d.Json) == 0 {
 		return converter.SalaryDetail{}
 	} else {
@@ -71,44 +71,11 @@ func (b *Balance) BonusDetail() converter.SalaryDetail {
 }
 
 // 明細画像
-func (b *Balance) Image(detailType DetailType) []byte {
+func (b *Balance) Image(detailType models.BalanceType) []byte {
 	month := b.Month
 	if len(b.Month) > 6 {
 		month = b.Month[:6]
 	}
 	detail, _ := findBalanceDetailByMonthType(month, detailType)
 	return detail.Image
-}
-
-// 明細タイプ
-type DetailType int
-
-const (
-	DetailTypeSalary  DetailType = 1 // 明細タイプ：給与明細
-	DetailTypeBonus   DetailType = 2 // 明細タイプ：賞与明細
-	DetailTypeExpense DetailType = 3 // 明細タイプ：経費明細
-)
-
-// 明細データ
-type BalanceDetail struct {
-	ID    uint           `gorm:"primaryKey" ` // id
-	Month string         // 年月(yyyyMM)
-	Type  DetailType     `gorm:"default:1;"` // 種別
-	Json  datatypes.JSON // JSONデータ
-	Image []byte         // 画像データ
-}
-
-// 給与支給明細のキーデータ
-type KeySalary struct {
-	Month string // 年月(yyyyMM)
-}
-
-// ----------------------------------------------------------------------------
-
-// 給与支給明細書（年単位集計）モデル
-type SalaryYear struct {
-	Year        string                   // 年
-	EnableYears []string                 // 利用可能な年のリスト
-	Totals      []converter.DetailItem   // 合計リスト
-	Details     []converter.SalaryDetail // 月ごとの給与支給明細リスト
 }

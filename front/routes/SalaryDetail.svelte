@@ -110,7 +110,7 @@
                 : 0}
             </p>
           </td>
-          <td />
+          <td></td>
         </tr>
       </tbody>
     </table>

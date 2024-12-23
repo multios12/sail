@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"github.com/multios12/sail/pkg/balance/converter"
+	"github.com/multios12/sail/pkg/balance/models"
 )
 
 // 指定されたディレクトリからPDFファイルを読み込み、給与明細モデルリストを返す
@@ -42,13 +43,13 @@ func readSalary(filename string, pdfPassword string) {
 			s = Balance{Month: month}
 		}
 
-		var detailType DetailType
+		var detailType models.BalanceType
 		if strings.Contains(filename, "経費") {
-			detailType = DetailTypeExpense
+			detailType = models.DetailTypeExpense
 		} else if strings.Contains(sv, "賞与") {
-			detailType = DetailTypeBonus
+			detailType = models.DetailTypeBonus
 		} else {
-			detailType = DetailTypeSalary
+			detailType = models.DetailTypeSalary
 		}
 
 		d, _ := findBalanceDetailByMonthType(month, detailType)
@@ -56,7 +57,7 @@ func readSalary(filename string, pdfPassword string) {
 			return
 		}
 
-		if detailType == DetailTypeExpense {
+		if detailType == models.DetailTypeExpense {
 			json, image, _ := converter.ConvertExpenseDetail(filename, pdfPassword)
 			upsertBalanceDetail(month, detailType, json, image)
 		} else {

@@ -58,7 +58,7 @@
           <table class="table is-striped is-hoverable">
             <thead>
               <tr>
-                <th />
+                <th></th>
                 <th class="is-hidden-mobile">総支給額</th>
                 <th class="is-hidden-mobile">差引支給額</th>
                 <th class="is-hidden-mobile">経費支給額</th>

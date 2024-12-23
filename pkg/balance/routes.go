@@ -16,6 +16,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/multios12/sail/pkg/balance/converter"
+	"github.com/multios12/sail/pkg/balance/models"
 )
 
 var balancePath string // データディレクトリ
@@ -124,7 +125,7 @@ func postBalanceMonth(c *gin.Context) {
 
 // 給与年単位データ GET API
 func getSalaryYear(c *gin.Context) {
-	y := SalaryYear{Year: c.Param("year")}
+	y := models.SalaryYear{Year: c.Param("year")}
 	y.EnableYears = findSalaryYears()
 
 	balances, _ := findBalanceByYear(y.Year)
@@ -223,7 +224,7 @@ func getSalaryDetailImage(c *gin.Context) {
 	if b, _ := findBalanceByMonth(m); len(b.Month) > 0 {
 		filename := c.Param("file")
 		i, _ := strconv.Atoi(filename[:1])
-		c.Data(http.StatusOK, "image/png", b.Image(DetailType(i)))
+		c.Data(http.StatusOK, "image/png", b.Image(models.BalanceType(i)))
 		return
 	}
 	c.Status(http.StatusNotFound)

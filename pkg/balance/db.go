@@ -9,6 +9,7 @@ import (
 
 	"github.com/glebarez/sqlite"
 	"github.com/multios12/sail/pkg/balance/converter"
+	"github.com/multios12/sail/pkg/balance/models"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
 )
@@ -29,7 +30,7 @@ func dbOpen(salaryPath string) (err error) {
 	if err != nil {
 		return
 	}
-	err = db.AutoMigrate(&BalanceDetail{})
+	err = db.AutoMigrate(&models.BalanceDetail{})
 	return
 }
 
@@ -69,7 +70,6 @@ func findBalanceByMonth(month string) (b Balance, err error) {
 	result := db.Find(&b, month)
 	b.Month = month
 	return b, result.Error
-
 }
 
 /**  バランスシートの追加・更新 */
@@ -85,11 +85,11 @@ func calculateSalary(month string) {
 	expenseItem := converter.ExpenseDetail{}
 
 	for _, detail := range details {
-		if detail.Type == DetailTypeSalary {
+		if detail.Type == models.DetailTypeSalary {
 			json.Unmarshal(detail.Json, &salaryItem)
-		} else if detail.Type == DetailTypeBonus {
+		} else if detail.Type == models.DetailTypeBonus {
 			json.Unmarshal(detail.Json, &bonusItem)
-		} else if detail.Type == DetailTypeExpense {
+		} else if detail.Type == models.DetailTypeExpense {
 			json.Unmarshal(detail.Json, &expenseItem)
 		}
 	}
@@ -135,12 +135,12 @@ func findSalaryYears() []string {
 }
 
 // ----------------------------------------------------------------------------
-func findBalanceDetailByMonth(month string) (details []BalanceDetail, err error) {
+func findBalanceDetailByMonth(month string) (details []models.BalanceDetail, err error) {
 	result := db.Where("month = ?", month).Order("type").Find(&details)
 	return details, result.Error
 }
 
-func findBalanceDetailByMonthType(month string, detailType DetailType) (detail BalanceDetail, err error) {
+func findBalanceDetailByMonthType(month string, detailType models.BalanceType) (detail models.BalanceDetail, err error) {
 	result := db.Where("month = ? and type = ?", month, detailType).Find(&detail)
 	detail.Month = month
 	detail.Type = detailType
@@ -148,7 +148,7 @@ func findBalanceDetailByMonthType(month string, detailType DetailType) (detail B
 }
 
 // 給与明細データをもとにバランスシートを更新する
-func upsertBalanceDetail(month string, detailType DetailType, item []byte, image []byte) {
+func upsertBalanceDetail(month string, detailType models.BalanceType, item []byte, image []byte) {
 	b, _ := findBalanceDetailByMonthType(month, detailType)
 	b.Month = month
 	b.Json = item
@@ -159,6 +159,21 @@ func upsertBalanceDetail(month string, detailType DetailType, item []byte, image
 }
 
 func deleteBalanceDetail(month string) {
-	db.Where("month = ?", month).Delete(&BalanceDetail{})
+	db.Where("month = ?", month).Delete(&models.BalanceDetail{})
+}
 
+// ----------------------------------------------------------------------------
+
+func FindUseById(id uint) (model models.UseDetail, err error) {
+	result := db.Find(&model, id)
+	return model, result.Error
+}
+
+func FindUseByPayMonth(payMonth string) (models []models.UseDetail, err error) {
+	result := db.Find(&models, "payMonth = ?", payMonth)
+	return models, result.Error
+}
+
+func UpsertUse(u []models.UseDetail) {
+	db.Clauses(clause.OnConflict{UpdateAll: true}).Create(&u)
 }

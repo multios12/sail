@@ -28,26 +28,28 @@
 <tr>
   <td>
     <table>
-      <tr>
-        <td>給与総額</td>
-        <td>{model.Salary.toLocaleString()}</td>
-      </tr>
-      <tr>
-        <td>振込額</td>
-        <td>{model.Paid.toLocaleString()}</td>
-      </tr>
-      <tr>
-        <td>固定支出額</td>
-        <td>{model.Cost.toLocaleString()}</td>
-      </tr>
-      <tr>
-        <td>貯蓄</td>
-        <td>{saving}</td>
-      </tr>
-      <tr>
-        <td>メモ</td>
-        <td>{memo}</td>
-      </tr>
+      <tbody>
+        <tr>
+          <td>給与総額</td>
+          <td>{model.Salary.toLocaleString()}</td>
+        </tr>
+        <tr>
+          <td>振込額</td>
+          <td>{model.Paid.toLocaleString()}</td>
+        </tr>
+        <tr>
+          <td>固定支出額</td>
+          <td>{model.Cost.toLocaleString()}</td>
+        </tr>
+        <tr>
+          <td>貯蓄</td>
+          <td>{saving}</td>
+        </tr>
+        <tr>
+          <td>メモ</td>
+          <td>{memo}</td>
+        </tr>
+      </tbody>
     </table>
   </td>
 </tr>

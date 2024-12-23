@@ -26,13 +26,13 @@
       <table class="table is-striped is-hoverable">
         <thead>
           <tr>
-            <th />
+            <th></th>
             <th>給与総額</th>
             <th><a href="/salary/{year}" use:link>振込額</a></th>
             <th><a href="/cost/{year}" use:link>固定支出額</a></th>
             <th>貯蓄額</th>
             <th>メモ</th>
-            <th />
+            <th></th>
           </tr>
         </thead>
         <tbody>
