@@ -5,10 +5,10 @@
 /front/node_modules
 /front/package-lock.json
 /sail
-/cmd/sail/__debug_bin*
+/api/cmd/sail/__debug_bin*
 /__debug_bin
 /__debug_bin.exe
 /static/static
-/cmd/sail/static/*.html
-/cmd/sail/static/favicon.ico
-/cmd/sail/static/asset-manifest.json
+/api/cmd/sail/static/*.html
+/api/cmd/sail/static/favicon.ico
+/api/cmd/sail/static/asset-manifest.json

@@ -10,14 +10,14 @@
             "name": "Launch edge against localhost",
             "url": "http://localhost:3000",
             "webRoot": "${workspaceFolder}/front",
-            "preLaunchTask": "npm: dev",
+            "preLaunchTask": "front: dev",
         },
         {
             "name": "go API Server",
             "type": "go",
             "request": "launch",
             "mode": "auto",
-            "program": "./cmd/sail",
+            "program": "./api/cmd/sail",
             "args": [
                 "-d",
                 "../../data",

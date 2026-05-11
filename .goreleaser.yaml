@@ -16,7 +16,7 @@ version: 1
     #- go generate ./...
 
 builds:
-  - dir: ./cmd/sail
+  - dir: ./api/cmd/sail
     env:
     - CGO_ENABLED=0
     goos:
@@ -27,9 +27,9 @@ builds:
       #- 386
       - amd64
     hooks:
-      pre: 
+      pre:
         - cmd: go mod tidy
-          dir: .
+          dir: ./api
 
 archives:
   - format: tar.gz

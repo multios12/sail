@@ -22,12 +22,12 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
           cache: 'yarn'
-          cache-dependency-path: ./front/yarn.lock  
+          cache-dependency-path: ./front/yarn.lock
       - name: yarn build
         run: |
-          yarn --cwd ./front
+          yarn --cwd ./front install
           yarn --cwd ./front build
-          cp ./front/dist/* ./cmd/sail/static/ -R
+          cp ./front/dist/* ./api/cmd/sail/static/ -R
         env:
           HTML: index.html
 
