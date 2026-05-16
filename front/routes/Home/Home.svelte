@@ -1,13 +1,16 @@
 <script lang="ts">
+  import { fetchJson } from "../../lib/api";
   import type { BalanceYear } from "../../models/balanceModels";
   import YearCard from "./components/YearCard.svelte";
 
   export let params: { year: string | undefined } = { year: undefined };
   $: {
-    const url = `./api/balance/${params.year || new Date().getFullYear()}`;
-    fetch(url)
-      .then((r) => r.json())
-      .then((r) => (model = r));
+    const url = `/api/balance/${params.year || new Date().getFullYear()}`;
+    fetchJson<BalanceYear>(url).then((r) => {
+      if (r) {
+        model = r;
+      }
+    });
   }
 
   let model: BalanceYear = {

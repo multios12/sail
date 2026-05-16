@@ -14,7 +14,7 @@
     }
     const data = new FormData();
     data.append("file", file);
-    const r = fetch("./api/salary/files", { method: "post", body: data })
+    const r = fetch("/api/salary/files", { method: "post", body: data })
       .then((r) => {
         if (r.status === 200) {
           document.querySelector("#dialog")?.classList.remove("is-active");
@@ -42,17 +42,17 @@
 
 <div class="navbar-item field is-grouped">
   <p class="control nabbar-item">
-    <button class="button is-info" on:click={toggleClick}
+    <button class="button is-info" onclick={toggleClick}
       ><span class="material-icons"> file_upload </span>upload</button
     >
   </p>
 
   <div class="modal" id="dialog">
-    <div class="modal-background" />
+    <div class="modal-background"></div>
     <div class="modal-card">
       <header class="modal-card-head">
         <p class="modal-card-title">明細書 アップロード</p>
-        <button class="delete" aria-label="close" on:click={toggleClick} />
+        <button class="delete" aria-label="close" onclick={toggleClick}></button>
       </header>
       <section class="modal-card-body">
         {#if message != ""}
@@ -65,7 +65,7 @@
               class="file-input"
               type="file"
               name="resume"
-              on:change={fileChange}
+              onchange={fileChange}
             />
             <span class="file-cta">
               <span class="file-icon">
@@ -76,7 +76,7 @@
                 id="progress"
                 class="progress is-small is-primary is-hidden"
                 max="100"
-              />
+              ></progress>
             </span>
           </label>
         </div>

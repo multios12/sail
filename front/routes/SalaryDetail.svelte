@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { fetchJson } from "../lib/api";
   import type { SalaryMonthModel } from "../models/balanceModels.js";
   import { onMount } from "svelte";
 
@@ -24,10 +25,13 @@
 
     t.classList.add("is-loading");
     document.querySelector(".card-content")?.classList.add("is-hidden");
-    const url = `./api/salary/${params.year}/${params.month}`;
-    fetch(url, { method: "post" })
-      .then((r) => r.json())
-      .then((r) => (model = r))
+    const url = `/api/salary/${params.year}/${params.month}`;
+    fetchJson<SalaryMonthModel>(url, { method: "post" })
+      .then((r) => {
+        if (r) {
+          model = r;
+        }
+      })
       .finally(() => {
         t.classList.remove("is-loading");
         document.querySelector(".card-content")?.classList.remove("is-hidden");
@@ -35,10 +39,12 @@
   };
 
   onMount(async () => {
-    const url = `./api/salary/${params.year}/${params.month}`;
+    const url = `/api/salary/${params.year}/${params.month}`;
     console.log(url);
-    const r = await fetch(url);
-    model = await r.json();
+    const r = await fetchJson<SalaryMonthModel>(url);
+    if (r) {
+      model = r;
+    }
   });
 </script>
 
@@ -47,7 +53,7 @@
     <div class="card-header-title">
       {model.Title}
       <div class="control px-5">
-        <button class="button is-info" on:click={refreshClick}>
+        <button class="button is-info" onclick={refreshClick}>
           <span class="material-icons"> refresh </span>
         </button>
       </div>
@@ -116,7 +122,7 @@
     </table>
     {#each model.Images as i}
       <img
-        src={`./api/salary/${params.year}/${params.month}/images/${i}`}
+        src={`/api/salary/${params.year}/${params.month}/images/${i}`}
         alt="salary"
       />
     {/each}

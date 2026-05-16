@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { fetchJson } from "../lib/api";
   import type { SalaryModel } from "../models/balanceModels.js";
   import { link } from "svelte-spa-router";
 
@@ -6,10 +7,12 @@
   $: {
     params.year = params.year || String(new Date().getFullYear());
 
-    const url = `./api/salary/${params.year}`;
-    fetch(url)
-      .then((r) => r.json())
-      .then((r) => (model = r));
+    const url = `/api/salary/${params.year}`;
+    fetchJson<SalaryModel>(url).then((r) => {
+      if (r) {
+        model = r;
+      }
+    });
   }
   export let model: SalaryModel = {
     Year: new Date().getFullYear().toString(),

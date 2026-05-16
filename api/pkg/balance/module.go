@@ -11,6 +11,19 @@ import (
 	"github.com/multios12/sail/pkg/balance/models"
 )
 
+func ensureDataDirs() error {
+	for _, dir := range []string{
+		balancePath,
+		path.Join(balancePath, "_pdf"),
+		path.Join(balancePath, "db"),
+	} {
+		if err := os.MkdirAll(dir, os.ModePerm); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
 // 指定されたディレクトリからPDFファイルを読み込み、給与明細モデルリストを返す
 func readSalaries(balancePath string, pdfPassword string) error {
 	// PDFファイルの取得

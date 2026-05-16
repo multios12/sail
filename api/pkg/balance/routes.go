@@ -25,18 +25,10 @@ var pdfPassword string // PDFパスワード
 func Initial(router *gin.Engine, dataPath string, password string) {
 	balancePath = path.Join(dataPath, "balance")
 	pdfPassword = password
-	dbOpen(dataPath)
-
-	// PDFファイルのチェック、追加されていれば再読み込み
-	err := readSalaries(balancePath, pdfPassword)
-	if err != nil {
-		println(err)
-		return
+	if err := ensureDataDirs(); err != nil {
+		log.Println(err)
 	}
-
-	log.Println("info: balance:salaryPath:" + balancePath)
-	log.Println("info: balance:dbPath    :" + filepath.Join(balancePath, "db"))
-	//	log.Println("info: balance:data[count:" + strconv.Itoa(countSalary()) + "]")
+	dbOpen(dataPath)
 
 	// バランスシートAPI
 	router.GET("/api/balance/:year", getBalanceYear)
@@ -50,6 +42,16 @@ func Initial(router *gin.Engine, dataPath string, password string) {
 	router.POST("/api/salary/:year/:month", postSalaryMonth)
 	router.GET("/api/salary/:year/:month/images/:file", getSalaryDetailImage)
 	router.POST("/api/salary/files", postSalaryFiles)
+
+	// PDFファイルのチェック、追加されていれば再読み込み
+	err := readSalaries(balancePath, pdfPassword)
+	if err != nil {
+		log.Println(err)
+	}
+
+	log.Println("info: balance:salaryPath:" + balancePath)
+	log.Println("info: balance:dbPath    :" + filepath.Join(balancePath, "db"))
+	//	log.Println("info: balance:data[count:" + strconv.Itoa(countSalary()) + "]")
 }
 
 // バランスシート年単位データ GET API
@@ -234,6 +236,11 @@ func getSalaryDetailImage(c *gin.Context) {
 func postSalaryFiles(c *gin.Context) {
 	inFile, header, err := c.Request.FormFile("file")
 	if err != nil {
+		return
+	}
+
+	if err := ensureDataDirs(); err != nil {
+		c.String(http.StatusInternalServerError, err.Error())
 		return
 	}
 

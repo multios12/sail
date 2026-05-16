@@ -2,23 +2,88 @@
   "version": "2.0.0",
   "tasks": [
     {
-      "type": "npm",
-      "label": "npm: dev",
-      "script": "dev",
+      "label": "front: dev",
+      "type": "shell",
+      "command": "yarn",
+      "args": [
+        "--cwd",
+        "front",
+        "run",
+        "dev",
+        "--",
+        "--host",
+        "0.0.0.0",
+        "--strictPort",
+        "--port",
+        "3000"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "isBackground": true,
+      "group": "build",
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated",
+        "clear": false
+      },
       "problemMatcher": {
-        "owner": "custom",
+        "owner": "vite",
         "pattern": {
-          "regexp": "^$"
+          "regexp": "^(?!)$"
         },
         "background": {
           "activeOnStart": true,
-          "beginsPattern": "Compiling...",
-          "endsPattern": "Compiled .*"
+          "beginsPattern": "^(yarn\\s+run\\s+v|\\s*VITE\\s+v|\\s*vite\\b)",
+          "endsPattern": "Local:\\s+http://localhost:3000/"
         }
+      }
+    },
+    {
+      "label": "front: check",
+      "type": "shell",
+      "command": "yarn",
+      "args": [
+        "--cwd",
+        "front",
+        "run",
+        "check"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}"
       },
-      "detail": "vite",
-      "isBackground": true,
-      "path": "./front"
+      "group": "test",
+      "problemMatcher": "$tsc"
+    },
+    {
+      "label": "front: build",
+      "type": "shell",
+      "command": "yarn",
+      "args": [
+        "--cwd",
+        "front",
+        "run",
+        "build"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "group": "build",
+      "problemMatcher": "$tsc"
+    },
+    {
+      "label": "api: build",
+      "type": "shell",
+      "command": "go",
+      "args": [
+        "build",
+        "./cmd/sail"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}/api"
+      },
+      "group": "build",
+      "problemMatcher": "$go"
     }
   ]
 }
