@@ -12,7 +12,7 @@
 
   async function loadSalary(year: string) {
     const id = ++requestId;
-    const result = await fetchJson<SalaryModel>(`/api/salary/${year}`);
+    const result = await fetchJson<SalaryModel>(`./api/salary/${year}`);
     if (result && id === requestId) model = result;
   }
 

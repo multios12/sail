@@ -26,7 +26,7 @@
     if (replaceIndex !== undefined) data.append("replace", "true");
 
     try {
-      const response = await fetch("/api/salary/files", { method: "POST", body: data });
+      const response = await fetch("./api/salary/files", { method: "POST", body: data });
       if (!response.ok) {
         const detail = (await response.text()).trim();
         message = detail || ([502, 503, 504].includes(response.status)

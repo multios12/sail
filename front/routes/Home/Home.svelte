@@ -6,7 +6,7 @@
 
   export let params: { year: string | undefined } = { year: undefined };
   $: {
-    const url = `/api/balance/${params.year || new Date().getFullYear()}`;
+    const url = `./api/balance/${params.year || new Date().getFullYear()}`;
     fetchJson<BalanceYear>(url).then((r) => {
       if (r) {
         model = r;

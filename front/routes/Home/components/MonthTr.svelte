@@ -15,7 +15,7 @@
   const onClick = (e: MouseEvent) => {
     model.Saving = saving;
     model.Memo = memo;
-    const url = `/api/balance/${model.Month.toString().substring(
+    const url = `./api/balance/${model.Month.toString().substring(
       0,
       4,
     )}/${model.Month.toString().substring(4)}`;

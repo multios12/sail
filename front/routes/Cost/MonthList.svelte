@@ -20,7 +20,7 @@
       editMonth = Value.Month;
       return;
     }
-    let url = `/api/balance/${Value.Month.toString().substring(0, 4)}`;
+    let url = `./api/balance/${Value.Month.toString().substring(0, 4)}`;
     url = `${url}/${Value.Month.toString().substring(4)}`;
     const d = {
       Month: Value.Month,

@@ -27,7 +27,7 @@
 
   const fetchSalary = async () => {
     loading = true;
-    const url = `/api/salary/${params.year}/${params.month}`;
+    const url = `./api/salary/${params.year}/${params.month}`;
     try {
       const r = await fetchJson<SalaryMonthModel>(url);
       if (r) {
@@ -110,7 +110,7 @@
 
       {#each model.Images as i}
         <img
-          src={`/api/salary/${params.year}/${params.month}/images/${i}`}
+          src={`./api/salary/${params.year}/${params.month}/images/${i}`}
           alt="salary"
         />
       {/each}
