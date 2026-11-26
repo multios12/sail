@@ -38,11 +38,14 @@ func ConvertSalaryDetail(filename string, pdfPassword string) ([]byte, []byte, e
 	if data, image, err := readSalaryPdf(filename, s.Month, pages, pdfPassword); err != nil {
 		return nil, nil, err
 	} else {
-		s.Counts, s.IsError = readTextFileToDetailItem(data["salary01.txt"])
+		s.Counts, s.IsError = readTextFileToDetailItem(data["salary01.txt"], false)
 		s.Times, s.IsError = readTextFileToTimeItem(data["salary02.txt"])
-		s.Salarys, s.IsError = readTextFileToDetailItem(data["salary10.txt"])
-		s.Costs, s.IsError = readTextFileToDetailItem(data["salary20.txt"])
-		s.Totals, s.IsError = readTextFileToDetailItem(data["salary30.txt"])
+		s.Salarys, s.IsError = readTextFileToDetailItem(data["salary10.txt"], false)
+		s.Costs, s.IsError = readTextFileToDetailItem(data["salary20.txt"], false)
+		s.Totals, s.IsError = readTextFileToDetailItem(data["salary30.txt"], true)
+		if s.IsError || len(s.Totals) < 3 {
+			return nil, nil, errors.New("給与・賞与の合計欄を読み取れませんでした")
+		}
 		s.Title = fmt.Sprintf("%s年%s月 ", s.Month[:4], s.Month[4:6])
 		if strings.Contains(s.Month, "S") {
 			s.Title += "賞与"

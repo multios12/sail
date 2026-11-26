@@ -22,9 +22,11 @@
 
 <style>
   .summary-grid {
+    --summary-gap: 0.75rem;
+    --summary-quarter: calc((100% - 3 * var(--summary-gap)) / 4);
     display: grid;
-    gap: 0.75rem;
-    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: var(--summary-gap);
+    grid-template-columns: repeat(auto-fit, minmax(min(160px, var(--summary-quarter)), 1fr));
     padding: 1rem 1.25rem;
   }
 
@@ -51,7 +53,7 @@
     text-align: right;
   }
 
-  @media screen and (max-width: 768px) {
+  @media screen and (width < 720px) {
     .summary-grid {
       grid-template-columns: 1fr;
       padding: 1rem;

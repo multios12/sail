@@ -1,45 +1,76 @@
 <script lang="ts">
-  import { pop } from "svelte-spa-router";
-  /** メッセージ */
+  export let onImported: () => void = () => {};
+
+  const labels = {
+    imported: "取り込み完了",
+    replaced: "差し替え完了",
+    already_registered: "同じ年月・種別の明細が登録済みです",
+    invalid_filename: "ファイル名が規則に合っていません",
+    conversion_failed: "変換に失敗しました。PDFの内容とパスワードを確認してください",
+    save_failed: "保存に失敗しました",
+  };
+  type Result = { filename: string; status: keyof typeof labels };
+
   let message = "";
+  let files: File[] = [];
+  let results: Result[] = [];
+  let replacement: number | null = null;
   let isDialogOpen = false;
   let isUploading = false;
 
-  /** ファイル選択イベント */
-  const fileChange = async () => {
-    const e = document.querySelector("#fileInput") as HTMLInputElement;
-    const file = e.files?.item(0);
-    if (!file) {
-      message = "select file is null";
-      return;
-    }
+  async function upload(selected: File[], replaceIndex?: number) {
     isUploading = true;
+    message = "";
     const data = new FormData();
-    data.append("file", file);
-    fetch("/api/salary/files", { method: "post", body: data })
-      .then((r) => {
-        if (r.status === 200) {
-          isDialogOpen = false;
-          pop();
-        } else {
-          r.text().then((text) => {
-            message = text;
-          });
-        }
-      })
-      .catch((r) => {
-        console.log(r);
-        message = "ファイルを保存できませんでした";
-      })
-      .finally(() => {
-        isUploading = false;
-      });
-  };
+    selected.forEach((file) => data.append("file", file));
+    if (replaceIndex !== undefined) data.append("replace", "true");
 
-  /** モーダルトグルイベント */
-  const toggleClick = () => {
+    try {
+      const response = await fetch("/api/salary/files", { method: "POST", body: data });
+      if (!response.ok) {
+        const detail = (await response.text()).trim();
+        message = detail || ([502, 503, 504].includes(response.status)
+          ? "sailのAPIに接続できません。開発環境では Go API（3001番）を起動してください。"
+          : `アップロードに失敗しました（HTTP ${response.status}）`);
+        return;
+      }
+
+      const received: Result[] = await response.json();
+      if (replaceIndex === undefined) {
+        results = received;
+      } else {
+        results = results.map((result, i) => i === replaceIndex ? received[0] : result);
+        if (received[0].status === "replaced" || received[0].status === "imported") replacement = null;
+      }
+      if (received.some(({ status }) => status === "imported" || status === "replaced")) {
+        onImported();
+      }
+    } catch {
+      message = "アップロード結果を取得できませんでした";
+    } finally {
+      isUploading = false;
+    }
+  }
+
+  function fileChange(event: Event) {
+    const input = event.currentTarget as HTMLInputElement;
+    files = Array.from(input.files ?? []);
+    input.value = "";
+    results = [];
+    replacement = null;
+    if (files.length) void upload(files);
+  }
+
+  function toggleClick() {
+    if (isUploading) return;
+    if (isDialogOpen) {
+      files = [];
+      results = [];
+      replacement = null;
+      message = "";
+    }
     isDialogOpen = !isDialogOpen;
-  };
+  }
 </script>
 
 <div class="upload-button">
@@ -49,37 +80,61 @@
   </button>
 
   {#if isDialogOpen}
-    <div class="upload-modal" id="dialog" role="dialog" aria-modal="true">
+    <div class="upload-modal" id="dialog" role="dialog" aria-modal="true" aria-labelledby="upload-title">
       <button
         class="dialog-backdrop"
-        aria-label="close"
+        aria-label="閉じる" disabled={isUploading}
         onclick={toggleClick}
       ></button>
       <div class="dialog-panel">
         <header class="dialog-head">
-          <p class="dialog-title">明細書 アップロード</p>
-          <button class="close-button" aria-label="close" onclick={toggleClick}></button>
+          <p class="dialog-title" id="upload-title">明細書 アップロード</p>
+          <button class="close-button" aria-label="閉じる" disabled={isUploading} onclick={toggleClick}></button>
         </header>
         <section class="dialog-body">
           {#if message != ""}
-            <div class="error-message">{message}</div>
+            <div class="error-message" role="alert">{message}</div>
           {/if}
           <label class="file-picker">
             <input
               id="fileInput"
               class="picker-input"
               type="file"
-              name="resume"
+              accept=".pdf,application/pdf"
+              multiple
+              disabled={isUploading}
               onchange={fileChange}
             />
             <span class="picker-target">
               <span class="material-icons" aria-hidden="true"> file_upload </span>
-              <span>Choose a file...</span>
+              <span>PDFを選択（複数可）</span>
             </span>
             {#if isUploading}
-              <progress class="upload-progress" max="100"></progress>
+              <span role="status">PDFを取り込み中です…</span>
+              <progress class="upload-progress" max="100" aria-label="取り込み中"></progress>
             {/if}
           </label>
+          <p class="filename-hint">ファイル名の例　2026年11月給与_明細.pdf</p>
+          {#if results.length}
+            <ul class="upload-results" aria-live="polite">
+              {#each results as result, i}
+                <li>
+                  <strong>{result.filename}</strong>
+                  <div>{labels[result.status]}</div>
+                  {#if replacement === i}
+                    <p>このPDFで現在の明細を上書きしますか？</p>
+                    <button type="button" class="button is-small is-info" disabled={isUploading}
+                      onclick={() => upload([files[i]], i)}>差し替える</button>
+                    <button type="button" class="button is-small" disabled={isUploading}
+                      onclick={() => (replacement = null)}>キャンセル</button>
+                  {:else if result.status === "already_registered"}
+                    <button type="button" class="button is-small" disabled={isUploading}
+                      onclick={() => (replacement = i)}>差し替えて再取り込み</button>
+                  {/if}
+                </li>
+              {/each}
+            </ul>
+          {/if}
         </section>
       </div>
     </div>
@@ -134,7 +189,8 @@
     position: relative;
     z-index: 1;
     width: min(100%, 640px);
-    overflow: hidden;
+    max-height: 90vh;
+    overflow-y: auto;
     border-radius: 6px;
     background: #fff;
     color: #111827;
@@ -243,5 +299,21 @@
     height: 0.5rem;
     margin-top: 1rem;
     accent-color: #0ea5e9;
+  }
+  .filename-hint {
+    margin-top: 0.5rem;
+    color: #475569;
+    font-size: 0.875rem;
+  }
+
+  .upload-results li {
+    border-top: 1px solid #e5e7eb;
+    margin-top: 0.75rem;
+    padding-top: 0.75rem;
+    overflow-wrap: anywhere;
+  }
+
+  .upload-results button {
+    margin-top: 0.35rem;
   }
 </style>

@@ -1,8 +1,6 @@
 package balance
 
 import (
-	"fmt"
-	"io"
 	"log"
 	"net/http"
 	"os"
@@ -127,18 +125,21 @@ func postBalanceMonth(c *gin.Context) {
 
 // 給与年単位データ GET API
 func getSalaryYear(c *gin.Context) {
-	y := models.SalaryYear{Year: c.Param("year")}
+	y := models.SalaryYear{
+		Year:    c.Param("year"),
+		Details: []converter.SalaryDetail{},
+		Totals:  []converter.DetailItem{},
+	}
 	y.EnableYears = findSalaryYears()
 
 	balances, _ := findBalanceByYear(y.Year)
 	for _, balance := range balances {
 		d := balance.SalaryDetail()
-		if len(d.Month) == 0 || d.Month[:4] != y.Year {
-			continue
+		if len(d.Month) >= 6 && d.Month[:4] == y.Year {
+			d.Expense = balance.Expense
+			d.Title = d.Month[:4] + "年" + d.Month[4:] + "月 給与"
+			y.Details = append(y.Details, d)
 		}
-		d.Expense = balance.Expense
-		d.Title = d.Month[:4] + "年" + d.Month[4:] + "月 給与"
-		y.Details = append(y.Details, d)
 
 		b := balance.BonusDetail()
 		if len(b.Month) > 0 && b.Month[:4] == y.Year {
@@ -188,6 +189,8 @@ func getSalaryMonth(c *gin.Context) {
 
 // 月単位データ POST API
 func postSalaryMonth(c *gin.Context) {
+	salaryImportMu.Lock()
+	defer salaryImportMu.Unlock()
 	m := c.Param("year") + c.Param("month")
 	if strings.Contains(m, "S") {
 		m = m[:6]
@@ -211,8 +214,6 @@ func putSalaryMonth(c *gin.Context) {
 		}
 	}
 
-	// PDFファイルの変換とデータ再読み込み
-	readSalary(balancePath, pdfPassword)
 	if s, _ := findBalanceByMonth(m); len(s.Month) > 0 {
 		c.JSON(http.StatusOK, s.SalaryDetail())
 		return
@@ -234,31 +235,38 @@ func getSalaryDetailImage(c *gin.Context) {
 
 // 給与ファイル保存 POST API
 func postSalaryFiles(c *gin.Context) {
-	inFile, header, err := c.Request.FormFile("file")
+	form, err := c.MultipartForm()
 	if err != nil {
+		c.String(http.StatusBadRequest, "PDFファイルを選択してください")
 		return
 	}
+	defer form.RemoveAll()
 
+	files := form.File["file"]
+	if len(files) == 0 {
+		c.String(http.StatusBadRequest, "PDFファイルを選択してください")
+		return
+	}
+	replace := c.PostForm("replace") == "true"
+	if replace && len(files) != 1 {
+		c.String(http.StatusBadRequest, "差し替えるPDFは1件ずつ指定してください")
+		return
+	}
 	if err := ensureDataDirs(); err != nil {
-		c.String(http.StatusInternalServerError, err.Error())
+		c.String(http.StatusInternalServerError, "PDFの保存先を準備できませんでした")
 		return
 	}
 
-	filename := filepath.Join(balancePath, "_pdf", header.Filename)
-	outFile, err := os.Create(filename)
-	if err != nil {
-		c.String(http.StatusInternalServerError, err.Error())
-		return
+	results := make([]salaryImportResult, 0, len(files))
+	for _, file := range files {
+		input, err := file.Open()
+		if err != nil {
+			log.Println("アップロードされた明細の読み込み:", err)
+			results = append(results, salaryImportResult{Filename: file.Filename, Status: saveFailed})
+			continue
+		}
+		results = append(results, uploadSalaryPDF(file.Filename, input, replace))
+		input.Close()
 	}
-
-	_, err = io.Copy(outFile, inFile)
-	if err != nil {
-		err = fmt.Errorf("ファイルが保存できません: %w", err)
-		c.String(http.StatusInternalServerError, err.Error())
-		return
-	}
-	outFile.Close()
-
-	readSalary(filename, pdfPassword)
-	c.Status(http.StatusOK)
+	c.JSON(http.StatusOK, results)
 }

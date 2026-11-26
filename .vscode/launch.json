@@ -7,7 +7,11 @@
       "request": "launch",
       "mode": "debug",
       "program": "${workspaceFolder}/api/cmd/sail",
+      "dlvCwd": "${workspaceFolder}/api/cmd/sail",
       "cwd": "${workspaceFolder}",
+      "env": {
+        "GOWORK": "off"
+      },
       "args": [
         "-d",
         "${workspaceFolder}/data",

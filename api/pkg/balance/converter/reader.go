@@ -1,6 +1,7 @@
 package converter
 
 import (
+	"fmt"
 	"os/exec"
 	"regexp"
 	"strconv"
@@ -8,7 +9,7 @@ import (
 )
 
 // テキストファイルの読み込みと解析を行い、DetailItemを返す
-func readTextFileToDetailItem(text string) (items []DetailItem, isErr bool) {
+func readTextFileToDetailItem(text string, includeNonPositive bool) (items []DetailItem, isErr bool) {
 	r := regexp.MustCompile(`^[\-,0-9]+$`)
 
 	lines := strings.Split(text, "\n")
@@ -34,8 +35,7 @@ func readTextFileToDetailItem(text string) (items []DetailItem, isErr bool) {
 			item.Value, err = strconv.Atoi(v)
 			if err != nil {
 				isErr = true
-			}
-			if item.Value > 0 {
+			} else if includeNonPositive || item.Value > 0 {
 				items = append(items, item)
 			}
 			item = DetailItem{Name: "", Value: 0}
@@ -121,12 +121,19 @@ func readTextFileToExpenseItem(text string) (item ExpenseDetail, err error) {
 		targets = append(targets, v)
 	}
 
+	if len(targets) == 0 {
+		return item, fmt.Errorf("経費支給額を読み取れませんでした")
+	}
+
 	regAmount = regexp.MustCompile("^[1-9]$")
 	r2 := regexp.MustCompile("^[0-9]+$")
 	amountItem := AmountItem{}
 	for i, v := range targets {
 		if i == 0 {
-			item.Expense, _ = strconv.Atoi(v)
+			item.Expense, err = strconv.Atoi(strings.TrimSpace(v))
+			if err != nil {
+				return item, fmt.Errorf("経費支給額を読み取れませんでした: %w", err)
+			}
 		} else if regAmount.MatchString(v) {
 			if len(amountItem.Name) > 0 {
 				item.Amounts = append(item.Amounts, amountItem)
@@ -150,8 +157,7 @@ func readTextFileToExpenseItem(text string) (item ExpenseDetail, err error) {
 
 // pdftotextコマンドを実行し、テキストデータを出力する
 func pdftostring(src string, opt string, pdfPassword string) string {
-	opt = src + " - -opw " + pdfPassword + " " + opt
-	args := strings.Split(opt, " ")
+	args := append([]string{src, "-", "-opw", pdfPassword}, strings.Fields(opt)...)
 	bytes, _ := exec.Command("pdftotext", args...).Output()
 	text := string(bytes)
 	text = strings.ReplaceAll(text, "\f", "")

@@ -7,16 +7,16 @@
   import { link } from "svelte-spa-router";
 
   export let params: { year: string | undefined } = { year: undefined };
-  $: {
-    params.year = params.year || String(new Date().getFullYear());
+  const currentYear = String(new Date().getFullYear());
+  let requestId = 0;
 
-    const url = `/api/salary/${params.year}`;
-    fetchJson<SalaryModel>(url).then((r) => {
-      if (r) {
-        model = r;
-      }
-    });
+  async function loadSalary(year: string) {
+    const id = ++requestId;
+    const result = await fetchJson<SalaryModel>(`/api/salary/${year}`);
+    if (result && id === requestId) model = result;
   }
+
+  $: loadSalary(params.year || currentYear);
   export let model: SalaryModel = {
     Year: new Date().getFullYear().toString(),
     Details: [],
@@ -43,7 +43,7 @@
     </div>
 
     <div class="salary-upload">
-      <UploadButton />
+      <UploadButton onImported={() => loadSalary(params.year || currentYear)} />
     </div>
   </div>
 
@@ -83,7 +83,7 @@
               <td class="amount">{format(Value.Totals[2].Value)}</td>
               {#if Value.Month.length === 6}
                 <td class="amount">{format(Value.Expense)}</td>
-                <td class="amount">{format(Value.Counts[0].Value)}</td>
+                <td class="amount">{format(Value.Counts?.[0]?.Value ?? 0)}</td>
               {:else}
                 <td></td>
                 <td></td>
@@ -126,7 +126,7 @@
             {#if Value.Month.length === 6}
               <div>
                 <dt>出勤</dt>
-                <dd>{format(Value.Counts[0].Value)}日</dd>
+                <dd>{format(Value.Counts?.[0]?.Value ?? 0)}日</dd>
               </div>
             {/if}
           </dl>
@@ -217,6 +217,7 @@
   .salary-table th,
   .salary-table td {
     border-color: #263244;
+    padding: 0.5rem 0.875rem;
     vertical-align: middle;
   }
 
@@ -267,7 +268,7 @@
     border-radius: 8px;
     color: #e5e7eb;
     display: block;
-    padding: 0.875rem;
+    padding: 1rem;
   }
 
   .mobile-salary-card:hover {
@@ -294,7 +295,7 @@
   .mobile-salary-card dl div {
     background: #101827;
     border-radius: 6px;
-    padding: 0.5rem;
+    padding: 0.625rem 0.75rem;
   }
 
   .mobile-salary-card dt {
@@ -326,7 +327,7 @@
     margin-left: 0.5rem;
   }
 
-  @media screen and (max-width: 768px) {
+  @media screen and (width < 720px) {
     .desktop-table {
       display: none;
     }
@@ -347,7 +348,7 @@
     }
   }
 
-  @media screen and (min-width: 769px) {
+  @media screen and (width >= 720px) {
     .mobile-list {
       display: none;
     }

@@ -78,8 +78,11 @@ func upsertBalance(b Balance) {
 }
 
 // 支給額の再計算
-func calculateSalary(month string) {
-	details, _ := findBalanceDetailByMonth(month)
+func calculateSalary(tx *gorm.DB, month string) error {
+	var details []models.BalanceDetail
+	if err := tx.Where("month = ?", month).Order("type").Find(&details).Error; err != nil {
+		return err
+	}
 	salaryItem := converter.SalaryDetail{}
 	bonusItem := converter.SalaryDetail{}
 	expenseItem := converter.ExpenseDetail{}
@@ -94,11 +97,7 @@ func calculateSalary(month string) {
 		}
 	}
 
-	balance, _ := findBalanceByMonth(month)
-
-	balance.Salary = 0
-	balance.Paid = 0
-	balance.Expense = expenseItem.Expense
+	balance := Balance{Month: month, Expense: expenseItem.Expense}
 	if len(salaryItem.Totals) >= 3 {
 		balance.Salary = salaryItem.Totals[0].Value
 		balance.Paid = salaryItem.Totals[2].Value
@@ -108,7 +107,10 @@ func calculateSalary(month string) {
 		balance.Paid += bonusItem.Totals[2].Value
 	}
 
-	upsertBalance(balance)
+	return tx.Clauses(clause.OnConflict{
+		Columns:   []clause.Column{{Name: "month"}},
+		DoUpdates: clause.AssignmentColumns([]string{"salary", "paid", "expense", "updated_at"}),
+	}).Create(&balance).Error
 }
 
 func findSalaryYears() []string {
@@ -135,11 +137,6 @@ func findSalaryYears() []string {
 }
 
 // ----------------------------------------------------------------------------
-func findBalanceDetailByMonth(month string) (details []models.BalanceDetail, err error) {
-	result := db.Where("month = ?", month).Order("type").Find(&details)
-	return details, result.Error
-}
-
 func findBalanceDetailByMonthType(month string, detailType models.BalanceType) (detail models.BalanceDetail, err error) {
 	result := db.Where("month = ? and type = ?", month, detailType).Find(&detail)
 	detail.Month = month
@@ -148,14 +145,11 @@ func findBalanceDetailByMonthType(month string, detailType models.BalanceType) (
 }
 
 // 給与明細データをもとにバランスシートを更新する
-func upsertBalanceDetail(month string, detailType models.BalanceType, item []byte, image []byte) {
-	b, _ := findBalanceDetailByMonthType(month, detailType)
-	b.Month = month
-	b.Json = item
-	b.Image = image
-
-	db.Clauses(clause.OnConflict{UpdateAll: true}).Create(&b)
-	calculateSalary(month)
+func upsertBalanceDetail(tx *gorm.DB, detail models.BalanceDetail) error {
+	if err := tx.Clauses(clause.OnConflict{UpdateAll: true}).Create(&detail).Error; err != nil {
+		return err
+	}
+	return calculateSalary(tx, detail.Month)
 }
 
 func deleteBalanceDetail(month string) {
