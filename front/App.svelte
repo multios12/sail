@@ -1,12 +1,13 @@
 <script lang="ts">
   import "bulma/css/bulma.css";
-  import Router, { location, link } from "svelte-spa-router";
+  import "mu-ui-lib/mu-theme.css";
+  import { MuHeader } from "mu-ui-lib";
+  import Router, { location, push } from "svelte-spa-router";
   import Home from "./routes/Home/Home.svelte";
   import SalaryList from "./routes/SalaryList.svelte";
   import SalaryDetail from "./routes/SalaryDetail.svelte";
   import Cost from "./routes/Cost/Cost.svelte";
-  import UploadButton from "./components/UploadButton.svelte";
-  let page = "";
+  let activeTab = "";
 
   const routes = {
     "/": Home,
@@ -16,81 +17,43 @@
     "/cost/:year": Cost,
   };
 
+  const getCurrentYear = () => new Date().getFullYear();
+
+  $: tabs = [
+    { id: "b", label: "balance", active: activeTab === "b" },
+    { id: "s", label: "salary", active: activeTab === "s" },
+    { id: "c", label: "cost", active: activeTab === "c" },
+  ];
+
   $: {
     if ($location.indexOf("/s") >= 0) {
-      page = "s";
+      activeTab = "s";
     } else if ($location.indexOf("/c") >= 0) {
-      page = "c";
+      activeTab = "c";
     } else {
-      page = "b";
+      activeTab = "b";
     }
   }
 
-  document.addEventListener("DOMContentLoaded", () => {
-    // Get all "navbar-burger" elements
-    const $navbarBurgers = Array.prototype.slice.call(
-      document.querySelectorAll(".navbar-burger"),
-      0,
-    );
-
-    // Add a click event on each of them
-    $navbarBurgers.forEach((el) => {
-      el.addEventListener("click", () => {
-        // Get the target from the "data-target" attribute
-        const target = el.dataset.target;
-        const _target = <HTMLElement>document.getElementById(target);
-
-        // Toggle the "is-active" class on both the "navbar-burger" and the "navbar-menu"
-        el.classList.toggle("is-active");
-        _target.classList.toggle("is-active");
-      });
-    });
-  });
+  const onTabSelect = (e: CustomEvent<{ id?: string }>) => {
+    activeTab = e.detail.id ?? "b";
+    if (e.detail.id === "s") {
+      push(`/salary/${getCurrentYear()}`);
+    } else if (e.detail.id === "c") {
+      push(`/cost/${getCurrentYear()}`);
+    } else {
+      push("/");
+    }
+  };
 </script>
 
-<nav class="navbar is-dark" aria-label="main navigation">
-  <div class="navbar-brand">
-    <div class="navbar-item is-unselectable has-text-weight-bold">sail</div>
-    <div class="navbar-burger js-burger" data-target="navbarMMemo">
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
-    </div>
-  </div>
-
-  <div id="navbarMMemo" class="navbar-menu">
-    <div class="navbar-start">
-      <a
-        class="navbar-item is-tab"
-        class:is-active={page == "b"}
-        href="/"
-        use:link
-      >
-        <i class="material-icons">balance</i>balance
-      </a>
-      <a
-        href="/salary/{new Date().getFullYear()}"
-        class="navbar-item is-tab"
-        class:is-active={page == "s"}
-        use:link
-      >
-        <i class="material-icons">attach_money</i>salary
-      </a>
-      <a
-        href="/cost/{new Date().getFullYear()}"
-        class="navbar-item is-tab"
-        class:is-active={page == "c"}
-        use:link
-      >
-        <i class="material-icons"> payment </i> cost
-      </a>
-      <div class="navbar-item is-tab">
-        <UploadButton />
-      </div>
-    </div>
-  </div>
-</nav>
+<MuHeader
+  title="sail"
+  headerButton={{ href: "/", name: "トップに戻る", icon: "sail-home-icon" }}
+  {tabs}
+  showLogout={false}
+  ontabselect={onTabSelect}
+/>
 <main>
   <div class="box">
     <Router {routes} />
@@ -98,4 +61,37 @@
 </main>
 
 <style>
+  :global(a:has(> .sail-home-icon)) {
+    --button-background: transparent;
+    --button-border-color: transparent;
+    --button-box-shadow: none;
+    --button-hover-border-color: transparent;
+    --button-hover-box-shadow: none;
+    --button-hover-transform: none;
+    --button-padding: 0;
+    --button-transition: color 0.15s ease;
+    color: var(--header-sub-title-color);
+    font-size: 0;
+    gap: 0;
+    justify-content: center;
+    margin-inline-end: 0.375rem;
+    min-block-size: 1.75rem;
+    min-inline-size: 1.75rem;
+    vertical-align: middle;
+  }
+
+  :global(a:has(> .sail-home-icon):hover),
+  :global(a:has(> .sail-home-icon):focus-visible) {
+    color: var(--color-primary-contract);
+  }
+
+  :global(a:has(> .sail-home-icon):focus-visible) {
+    outline: 2px solid currentColor;
+    outline-offset: 2px;
+  }
+
+  :global(.sail-home-icon)::before {
+    content: "home" / "";
+    font: normal 1.125rem / 1 "Material Icons";
+  }
 </style>

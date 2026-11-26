@@ -19,6 +19,8 @@
     "@tsconfig/svelte": "5.0.8",
     "@types/node": "25.8.0",
     "bulma": "1.0.4",
+    "lucide-svelte": "1.0.1",
+    "mu-ui-lib": "git+https://github.com/multios12/mu-ui-lib.git#53527881579c1ef1714f3c5cfde8c025efc04761",
     "purgecss": "^7.0.2",
     "svelte": "5.55.7",
     "svelte-check": "^4.4.8",

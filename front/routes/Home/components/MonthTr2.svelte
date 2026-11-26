@@ -1,7 +1,5 @@
 <script lang="ts">
-  import { onMount } from "svelte";
   import type { BalanceItem } from "../../../models/balanceModels";
-  import EditTd from "../../../components/EditTd.svelte";
 
   export let editMonth: String;
   export let model: BalanceItem;
@@ -12,16 +10,6 @@
   $: month =
     model.Month.substring(0, 4) + "年" + model.Month.substring(4) + "月";
   $: isEdit = editMonth === model.Month;
-
-  onMount(async () => {
-    if (editMonth === "" || editMonth === model.Month) {
-      document
-        .querySelector(`#edit${model.Month}`)
-        ?.classList.remove("is-hidden");
-    } else {
-      document.querySelector(`#edit${model.Month}`)?.classList.add("is-hidden");
-    }
-  });
 </script>
 
 <tr><td colspan="2">{month}</td></tr>

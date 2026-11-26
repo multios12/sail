@@ -1,5 +1,4 @@
 <script lang="ts">
-  import { onMount } from "svelte";
   import type { BalanceItem } from "../../../models/balanceModels";
   import EditTd from "../../../components/EditTd.svelte";
 
@@ -12,16 +11,6 @@
   $: month =
     model.Month.substring(0, 4) + "年" + model.Month.substring(4) + "月";
   $: isEdit = editMonth === model.Month;
-
-  onMount(async () => {
-    if (editMonth === "" || editMonth === model.Month) {
-      document
-        .querySelector(`#edit${model.Month}`)
-        ?.classList.remove("is-hidden");
-    } else {
-      document.querySelector(`#edit${model.Month}`)?.classList.add("is-hidden");
-    }
-  });
 
   const onClick = (e: MouseEvent) => {
     model.Saving = saving;
@@ -40,8 +29,8 @@
   <EditTd value={model.Salary.toLocaleString()} />
   <EditTd value={model.Paid.toLocaleString()} />
   <td
-    class="has-text-right"
-    class:has-background-danger-light={model.IsNotCost}
+    class:cost-warning={model.IsNotCost}
+    class="amount-cell"
   >
     {model.Cost.toLocaleString()}
   </td>
@@ -49,13 +38,52 @@
   <EditTd bind:value={memo} {isEdit} isText />
   <td>
     <button
-      class="button is-small material-icons"
-      class:is-primary={isEdit}
-      class:is-info={!isEdit}
-      class:is-inverted={!isEdit}
+      class:edit-action-active={isEdit}
+      class="edit-action material-icons"
       onclick={onClick}
     >
       {isEdit ? "save" : "edit"}
     </button>
   </td>
 </tr>
+
+<style>
+  .amount-cell {
+    text-align: right;
+  }
+
+  .cost-warning {
+    background: #fee2e2;
+    color: #991b1b;
+  }
+
+  .edit-action {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2rem;
+    height: 2rem;
+    border: 1px solid #0ea5e9;
+    border-radius: 4px;
+    background: transparent;
+    color: #7dd3fc;
+    cursor: pointer;
+    font-size: 1.15rem;
+    line-height: 1;
+  }
+
+  .edit-action:hover {
+    background: #0c4a6e;
+    color: #e0f2fe;
+  }
+
+  .edit-action-active {
+    border-color: #22c55e;
+    background: #16a34a;
+    color: #fff;
+  }
+
+  .edit-action-active:hover {
+    background: #15803d;
+  }
+</style>

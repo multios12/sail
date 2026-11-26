@@ -1,5 +1,6 @@
 <script lang="ts">
   import { fetchJson } from "../../lib/api";
+  import YearTabs from "../../components/YearTabs.svelte";
   import type { BalanceYear } from "../../models/balanceModels";
   import YearCard from "./components/YearCard.svelte";
 
@@ -20,8 +21,22 @@
   };
 </script>
 
-<div>
-  {#each model.EnableYears as year}
-    <YearCard {year} {model} />
-  {/each}
+<div class="home-page">
+  <YearTabs
+    years={model.EnableYears}
+    currentYear={model.Year}
+    ariaLabel="収支年選択"
+  />
+
+  {#if model.Year}
+    <YearCard year={model.Year} {model} />
+  {/if}
 </div>
+
+<style>
+  .home-page {
+    display: grid;
+    gap: 1rem;
+  }
+
+</style>

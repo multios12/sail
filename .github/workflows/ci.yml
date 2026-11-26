@@ -25,7 +25,7 @@ jobs:
           cache-dependency-path: ./front/yarn.lock
       - name: yarn build
         run: |
-          yarn --cwd ./front install
+          yarn --cwd ./front install --frozen-lockfile
           yarn --cwd ./front build
           cp ./front/dist/* ./api/cmd/sail/static/ -R
         env:
