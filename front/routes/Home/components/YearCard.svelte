@@ -121,13 +121,21 @@
     background: #1f2a3d;
   }
 
-  @media screen and (max-width: 768px) {
+  .desktop-content :global(td:not(:nth-child(6))) {
+    white-space: nowrap;
+  }
+
+  .desktop-content :global(td:nth-child(6)) {
+    overflow-wrap: anywhere;
+  }
+
+  @media screen and (width < 720px) {
     .desktop-content {
       display: none;
     }
   }
 
-  @media screen and (min-width: 769px) {
+  @media screen and (width >= 720px) {
     .mobile-content {
       display: none;
     }
